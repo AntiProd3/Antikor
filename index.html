@@ -93,6 +93,8 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 .duo-status::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--dim)}
 .duo-status.ok{color:var(--green)}.duo-status.ok::before{background:var(--green);box-shadow:0 0 8px var(--green)}
 .duo-status.err{color:var(--red)}.duo-status.err::before{background:var(--red)}
+.netlog summary{cursor:pointer;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.netlog pre{margin:8px 0;max-height:180px;overflow:auto;padding:8px;background:rgba(0,0,0,.45);border:1px solid var(--line);font:11px/1.45 ui-monospace,Menlo,Consolas,monospace;color:#b9c8e6;white-space:pre-wrap;word-break:break-word;-webkit-user-select:text;user-select:text}
 .wait-msg{grid-column:1/-1;margin:0;padding:28px 16px;text-align:center;font-size:15px;color:var(--dim);border:1px dashed var(--line)}
 .mate{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.12em;color:#ff6ad5}
 .mate .hpbox{width:min(110px,22vw);height:9px;border-color:#4a1f45}
@@ -1151,7 +1153,9 @@ function renderDuo(){const el=$('#duo-panel');const duo=save.players==='duo';el.
  else{
   h=`<div class="eyebrow">Partie ${esc(NET.code)}</div><p class="duo-status ${netOpen()?'ok':(NET.err?'err':'')}">${esc(NET.err||NET.status)}</p>
   <div class="duo-row"><button class="btn cut" data-net="leave">Quitter</button></div>`;}
- el.innerHTML=h;}
+ h+=`<details class="netlog"${NET.logOpen?' open':''}><summary>Journal de connexion</summary><pre id="net-log">${esc(NETLOG.join('\n'))||'(vide)'}</pre><div class="duo-row"><button class="btn cut" data-net="copylog">Copier le journal</button></div></details>`;
+ el.innerHTML=h;const pre=$('#net-log');if(pre)pre.scrollTop=pre.scrollHeight;
+ el.querySelector('details').addEventListener('toggle',ev=>{NET.logOpen=ev.target.open;});}
 function renderLab(){$('#lab-cores').innerHTML=svg('core',2)+`<span class="num">${save.cores}</span>`;
  $('#lab-talents').innerHTML=TALENTS.map((t,i)=>{const l=T(t.id);const max=l>=t.max;const cost=t.cost*(l+1);
   return `<button class="card cut tal" data-t="${i}" ${max||save.cores<cost?'aria-disabled="true"':''} style="--c:#ffd23e"><div class="card-name">${t.name}</div>${pips({from:l,to:l,max:t.max})}<p class="card-desc">${t.desc}</p><div class="price-row"><span class="price ${!max&&save.cores<cost?'poor':''}">${max?'MAX':svg('core',2)+cost}</span></div></button>`;}).join('');
@@ -1166,7 +1170,8 @@ $('#duo-panel').addEventListener('click',e=>{const b=e.target.closest('[data-net
  switch(b.dataset.net){
   case'host':hostGame();break;
   case'join':{const c=($('#code-in').value||'').trim().toUpperCase();if(c.length<4){NET.err='Saisis le code donné par l’hôte.';renderMenu();return;}joinGame(c);break;}
-  case'leave':netReset();renderMenu();break;
+  case'leave':netLog('Partie quittée');netReset();renderMenu();break;
+  case'copylog':{const t=NETLOG.join('\n');if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>{b.textContent='Journal copié ✓';},()=>{b.textContent='Copie impossible : sélectionne le texte';});break;}
   case'share':{const url=location.origin+location.pathname+'?join='+NET.code;
    if(navigator.share)navigator.share({title:'Néon Horde',text:'Rejoins ma partie de Néon Horde (code '+NET.code+')',url}).catch(()=>{});
    else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>{b.textContent='Lien copié ✓';},()=>{b.textContent=url;});
@@ -1365,6 +1370,29 @@ function drawMateArrow(){const m=G.players[1-ME];if(!m||G.state==='over')return;
 const NET={role:null,peer:null,conn:null,code:'',status:'',err:'',typed:'',peerInfo:null,hostMode:null,joinTO:0};
 const PEER_PREFIX='neonhorde-v1-';
 const PEERJS_URL='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+// Serveurs ICE : STUN pour trouver l'adresse publique, TURN (relais) quand la connexion directe est impossible (4G, réseaux d'entreprise…)
+const ICE=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:'stun:stun.cloudflare.com:3478'},
+ {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}];
+// ?signal=hote:port permet d'utiliser un autre serveur de mise en relation PeerJS (tests)
+const SIGNAL=new URLSearchParams(location.search).get('signal');
+function peerOpts(){const o={debug:2,config:{iceServers:ICE},logFunction:(lvl,...a)=>netLog('peerjs: '+a.map(x=>typeof x==='string'?x:(x&&x.message)||safeJson(x)).join(' '))};
+ if(SIGNAL){const[h,pt]=SIGNAL.split(':');Object.assign(o,{host:h,port:+pt||9000,path:'/',secure:location.protocol==='https:'&&h!=='localhost'});}return o;}
+
+/* ---------- Journal de connexion (affiché dans le menu duo, copiable pour le debug) ---------- */
+const NETLOG=[];const T0=Date.now();
+function safeJson(x){try{return JSON.stringify(x).slice(0,200);}catch(e){return String(x);}}
+function netLog(msg){const line=((Date.now()-T0)/1000).toFixed(1).padStart(6)+'s  '+msg;NETLOG.push(line);if(NETLOG.length>300)NETLOG.shift();console.log('[duo]',msg);
+ const el=document.getElementById('net-log');if(el){el.textContent=NETLOG.join('\n');el.scrollTop=el.scrollHeight;}}
+function netLogHeader(){netLog('— '+new Date().toISOString()+' · '+navigator.userAgent);netLog('page '+location.href+' · WebRTC '+(window.RTCPeerConnection?'oui':'NON'));}
+// Suit l'état WebRTC d'une connexion : c'est là qu'on voit si la liaison directe/relais réussit
+function watchIce(c){let tries=0;const t=setInterval(()=>{const pc=c.peerConnection;if(!pc){if(++tries>80)clearInterval(t);return;}clearInterval(t);
+ // types d'adresses proposées : host = réseau local, srflx = adresse publique (STUN), relay = relais TURN
+ const kinds=()=>{const k={};for(const m of(pc.localDescription&&pc.localDescription.sdp||'').matchAll(/ typ (\w+)/g))k[m[1]]=(k[m[1]]||0)+1;return k;};
+ const gathered=()=>{const k=kinds();netLog('ICE : adresses locales '+safeJson(k)+(k.srflx?'':' · aucune adresse publique (STUN bloqué ?)')+(k.relay?'':' · aucun relais TURN'));};
+ netLog('ICE : état initial '+pc.iceConnectionState+' / collecte '+pc.iceGatheringState);if(pc.iceGatheringState==='complete')gathered();
+ pc.addEventListener('iceconnectionstatechange',()=>{netLog('ICE : '+pc.iceConnectionState);if(pc.iceConnectionState==='failed'){NET.iceFailed=true;netLog('→ aucune route réseau entre les deux appareils (ni directe, ni via relais TURN)');}});
+ pc.addEventListener('connectionstatechange',()=>netLog('WebRTC : '+pc.connectionState));
+ pc.addEventListener('icegatheringstatechange',()=>{if(pc.iceGatheringState==='complete')gathered();});},50);}
 function netOpen(){return!!(NET.conn&&NET.conn.open);}
 function netSend(o){if(netOpen())try{NET.conn.send(o);}catch(e){console.warn(e);}}
 function PeerCls(){return window.Peer||(window.peerjs&&window.peerjs.Peer);}
@@ -1372,7 +1400,7 @@ function loadPeer(){if(PeerCls())return Promise.resolve();return new Promise((re
 function genCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<5;i++)c+=A[Math.floor(Math.random()*A.length)];return c;}
 function netReset(){clearTimeout(NET.joinTO);const c=NET.conn,p=NET.peer;NET.conn=null;NET.peer=null;
  try{if(c){c._quiet=true;c.close();}}catch(e){}try{if(p)p.destroy();}catch(e){}
- Object.assign(NET,{role:null,code:'',status:'',err:'',peerInfo:null,hostMode:null,sentMode:null,sentHello:''});REC=false;}
+ Object.assign(NET,{role:null,code:'',status:'',err:'',peerInfo:null,hostMode:null,sentMode:null,sentHello:'',iceFailed:false});REC=false;}
 function netFail(msg){const role=NET.role;netReset();NET.err=msg;if(!G||role!=='guest'){if(currentScreen()==='scr-menu'||!G)renderMenu();}}
 function peerErr(e){return e&&e.type==='network'||e&&e.type==='server-error'||e&&e.type==='socket-error'?'Serveur de mise en relation injoignable. Réessaie dans un instant.':
  e&&e.type==='browser-incompatible'?'Ce navigateur ne gère pas le jeu en ligne.':'Erreur réseau ('+(e&&e.type||'inconnue')+').';}
@@ -1381,33 +1409,41 @@ const LOCAL_NET=new URLSearchParams(location.search).get('net')==='local';
 function localConn(bc){const h={};const c={open:false,_bc:bc,on(ev,fn){(h[ev]=h[ev]||[]).push(fn);return c;},_emit(ev,x){for(const f of h[ev]||[])f(x);},
  send(o){bc.postMessage(o);},close(){if(!c.open)return;c.open=false;try{bc.postMessage({__bye:1});bc.close();}catch(e){}c._emit('close');}};
  bc.onmessage=ev=>{const m=ev.data;if(m.__bye){if(c.open){c.open=false;c._emit('close');}return;}if(m.__j||m.__ok)return;c._emit('data',m);};return c;}
-async function hostGame(){netReset();NET.role='host';NET.status='Création de la partie…';renderMenu();
+async function hostGame(){netReset();NET.role='host';NET.status='Connexion au serveur de mise en relation…';netLogHeader();netLog('Hôte : création de la partie');renderMenu();
  if(LOCAL_NET){NET.code=genCode();const bc=new BroadcastChannel('nh-'+NET.code);NET.peer={destroy(){bc.close();}};NET.status='En attente du joueur 2…';
   bc.onmessage=ev=>{if(ev.data.__j&&!NET.conn){const c=localConn(bc);NET.conn=c;bindConn(c);bc.postMessage({__ok:1});c.open=true;c._emit('open');}};renderMenu();return;}
- try{await loadPeer();}catch(e){netFail('Impossible de charger le module réseau (connexion internet ?).');return;}
+ try{await loadPeer();netLog('Module PeerJS chargé');}catch(e){netLog('ÉCHEC du chargement de PeerJS ('+PEERJS_URL+')');netFail('Impossible de charger le module réseau (connexion internet ?).');return;}
  if(NET.role!=='host')return;
- NET.code=genCode();const Peer=PeerCls();const peer=new Peer(PEER_PREFIX+NET.code);NET.peer=peer;
- peer.on('open',()=>{NET.status='En attente du joueur 2…';renderMenu();});
- peer.on('connection',c=>{if(netOpen()||G){c.on('open',()=>{c.send({t:'full'});setTimeout(()=>c.close(),400);});return;}NET.conn=c;bindConn(c);});
- peer.on('error',e=>{if(e.type==='unavailable-id'){hostGame();return;}if(!netOpen())netFail(peerErr(e));});
- peer.on('disconnected',()=>{if(NET.peer===peer&&!peer.destroyed)try{peer.reconnect();}catch(e){}});}
-async function joinGame(code){netReset();NET.role='guest';NET.code=code;NET.status='Connexion à la partie '+code+'…';renderMenu();
+ const code=genCode();const Peer=PeerCls();const peer=new Peer(PEER_PREFIX+code,peerOpts());NET.peer=peer;
+ const openTO=setTimeout(()=>{if(NET.peer===peer&&!peer.open){netLog('Serveur de mise en relation : pas de réponse après 15 s');netFail('Serveur de mise en relation injoignable. Réessaie dans un instant.');}},15000);
+ // le code n'est affiché qu'une fois enregistré auprès du serveur : sinon personne ne pourrait le rejoindre
+ peer.on('open',id=>{clearTimeout(openTO);if(NET.peer!==peer)return;NET.code=code;netLog('Enregistré auprès du serveur sous '+id);NET.status='En attente du joueur 2…';renderMenu();});
+ peer.on('connection',c=>{netLog('Demande de connexion reçue de '+c.peer);
+  if(netOpen()||G){netLog('Refusée : partie déjà complète ou en cours');c.on('open',()=>{c.send({t:'full'});setTimeout(()=>c.close(),400);});return;}
+  NET.conn=c;NET.status='Le joueur 2 arrive… (connexion en cours)';renderMenu();bindConn(c);watchIce(c);
+  clearTimeout(NET.joinTO);NET.joinTO=setTimeout(()=>{if(NET.conn===c&&!c.open){netLog('Connexion avec le joueur 2 jamais établie (20 s)');try{c._quiet=true;c.close();}catch(e){}NET.conn=null;NET.status='Le joueur 2 n’a pas pu se connecter (réseau bloquant ?). En attente…';renderMenu();}},20000);});
+ peer.on('error',e=>{netLog('Erreur PeerJS : '+e.type+' · '+(e.message||''));if(e.type==='unavailable-id'){hostGame();return;}if(!netOpen()&&!peer.open)netFail(peerErr(e));});
+ peer.on('disconnected',()=>{netLog('Déconnecté du serveur de mise en relation, reconnexion…');if(NET.peer===peer&&!peer.destroyed)try{peer.reconnect();}catch(e){}});}
+async function joinGame(code){netReset();NET.role='guest';NET.code=code;NET.status='Connexion à la partie '+code+'…';netLogHeader();netLog('Invité : rejoint '+code);renderMenu();
  if(LOCAL_NET){const bc=new BroadcastChannel('nh-'+code);const c=localConn(bc);NET.conn=c;NET.peer={destroy(){bc.close();}};bindConn(c);
   bc.addEventListener('message',ev=>{if(ev.data.__ok&&!c.open){c.open=true;c._emit('open');}});bc.postMessage({__j:1});
   NET.joinTO=setTimeout(()=>{if(!c.open)netFail('Partie introuvable. Vérifie le code.');},4000);return;}
- try{await loadPeer();}catch(e){netFail('Impossible de charger le module réseau (connexion internet ?).');return;}
+ try{await loadPeer();netLog('Module PeerJS chargé');}catch(e){netLog('ÉCHEC du chargement de PeerJS ('+PEERJS_URL+')');netFail('Impossible de charger le module réseau (connexion internet ?).');return;}
  if(NET.role!=='guest')return;
- const Peer=PeerCls();const peer=new Peer();NET.peer=peer;
- peer.on('open',()=>{const c=peer.connect(PEER_PREFIX+code,{reliable:true,serialization:'json'});NET.conn=c;bindConn(c);
-  NET.joinTO=setTimeout(()=>{if(!netOpen())netFail('Partie introuvable. Vérifie le code.');},12000);});
- peer.on('error',e=>{if(e.type==='peer-unavailable')netFail('Partie introuvable. Vérifie le code.');else if(!netOpen())netFail(peerErr(e));});}
+ const Peer=PeerCls();const peer=new Peer(peerOpts());NET.peer=peer;
+ const openTO=setTimeout(()=>{if(NET.peer===peer&&!peer.open){netLog('Serveur de mise en relation : pas de réponse après 15 s');netFail('Serveur de mise en relation injoignable. Réessaie dans un instant.');}},15000);
+ peer.on('open',id=>{clearTimeout(openTO);if(NET.peer!==peer)return;netLog('Enregistré auprès du serveur sous '+id+', appel de l’hôte…');NET.status='Hôte trouvé ? Connexion en cours…';renderMenu();
+  const c=peer.connect(PEER_PREFIX+code,{reliable:true,serialization:'json'});NET.conn=c;bindConn(c);watchIce(c);
+  NET.joinTO=setTimeout(()=>{if(!netOpen()){netLog('Connexion jamais établie après 20 s');netFail(NET.iceFailed?'Connexion directe impossible entre vos deux réseaux. Essayez un autre réseau (ex. le même Wi-Fi).':'Impossible de joindre la partie. Vérifie le code ou réessaie.');}},20000);});
+ peer.on('error',e=>{netLog('Erreur PeerJS : '+e.type+' · '+(e.message||''));if(e.type==='peer-unavailable')netFail('Partie introuvable. Vérifie le code (l’hôte doit rester sur le menu).');else if(!netOpen()&&!peer.open)netFail(peerErr(e));});
+ peer.on('disconnected',()=>{netLog('Déconnecté du serveur de mise en relation');if(NET.peer===peer&&!peer.destroyed&&!netOpen())try{peer.reconnect();}catch(e){}});}
 function bindConn(c){
- c.on('open',()=>{if(NET.conn!==c)return;clearTimeout(NET.joinTO);NET.err='';NET.lastRx=performance.now();NET.sentMode=null;NET.sentHello='';
+ c.on('open',()=>{netLog('Canal de données OUVERT avec '+(c.peer||'le partenaire'));if(NET.conn!==c)return;clearTimeout(NET.joinTO);NET.err='';NET.lastRx=performance.now();NET.sentMode=null;NET.sentHello='';
   if(NET.role==='guest'){NET.status='Connecté ! L’hôte va lancer la partie.';sendHello();}else NET.status='Joueur 2 connecté. Lance la partie !';
   SfxRaw.init();SfxRaw.wave();if(!G)renderMenu();});
  c.on('data',m=>{if(NET.conn!==c||!m||typeof m!=='object')return;NET.lastRx=performance.now();if(m.t==='ping')return;if(m.t==='bye'){onPeerLost();return;}try{onNet(m);}catch(e){console.error(e);}});
- c.on('close',()=>{if(NET.conn!==c||c._quiet)return;onPeerLost();});
- c.on('error',e=>console.warn('conn',e));}
+ c.on('close',()=>{netLog('Canal de données fermé');if(NET.conn!==c||c._quiet)return;onPeerLost();});
+ c.on('error',e=>netLog('Erreur canal : '+(e&&e.type||'')+' '+(e&&e.message||e)));}
 function sendHello(){const m={t:'hello',ts:talentStats(),unlocked:save.unlocked,start:save.start};const k=JSON.stringify(m);if(k===NET.sentHello)return;NET.sentHello=k;netSend(m);}
 // Signal de vie : sans nouvelles du partenaire pendant 8 s, on considère la connexion perdue
 setInterval(()=>{if(!netOpen())return;netSend({t:'ping'});if(performance.now()-(NET.lastRx||0)>8000){const c=NET.conn;c._quiet=true;try{c.close();}catch(e){}onPeerLost();}},2000);
