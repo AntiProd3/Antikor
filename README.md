@@ -5,7 +5,7 @@ Jeu d'arcade néon en un seul fichier HTML, publié avec GitHub Pages.
 - Jouer : https://antoinecorcos.github.io/neonhorde/
 - Code : `index.html`
 
-Version actuelle : **0.5** (affichée en bas à droite du jeu).
+Version actuelle : **0.6** (affichée en bas à droite du jeu).
 
 ## Armes, raretés et box
 
@@ -14,6 +14,8 @@ Version actuelle : **0.5** (affichée en bas à droite du jeu).
 - 5 raretés : Commun, Rare, Épique, Légendaire, Mythique. Plus c'est rare, plus l'arme est forte (dégâts, recharge, zone ; Légendaire et Mythique commencent niveau 2, Mythique +1 projectile).
 - **Inventaire** (menu uniquement) : équiper son arme de départ, fusionner 3 exemplaires identiques en une rareté supérieure.
 - En partie, seules les armes possédées apparaissent, avec la meilleure rareté possédée.
+- **1 seule arme à la fois** au départ ; le talent **Arsenal** du labo ajoute des emplacements (jusqu'à 4 armes : 120, 260 puis 450 noyaux).
+- Une partie abandonnée ne rapporte aucun noyau (les box trouvées sont conservées).
 - 14 armes, dont 4 nouvelles en 0.4 : Lance-flammes, Rayon cryo, Katana néon, Singularité.
 
 ## Boss

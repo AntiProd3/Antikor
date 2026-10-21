@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Néon Horde</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#05070e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Néon Horde">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:wght@400;500;600;700&display=swap">
@@ -92,6 +101,12 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 .equip-card small{display:block;font-size:12px;color:var(--dim);margin-top:4px}
 .inv-big{font-size:16px;padding:0 26px;min-height:64px}
 @media (max-width:420px){.equip{grid-template-columns:1fr}.inv-big{min-height:52px}}
+.box-row{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.box-row .box-card{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto 1fr auto;column-gap:16px;row-gap:8px;background:radial-gradient(ellipse at 15% 40%,color-mix(in srgb,var(--c) 22%,transparent),transparent 60%),linear-gradient(170deg,color-mix(in srgb,var(--c) 10%,#0a1122),#080d1a 70%)}
+.box-row .box-art{grid-row:1/5;align-self:center;width:96px;height:96px}
+.box-row .card-top,.box-row .card-name,.box-row .odds,.box-row .inv-actions{grid-column:2}
+.box-row .odds{grid-template-columns:repeat(2,auto 1fr);column-gap:8px}
+@media (max-width:420px){.box-row .box-art{width:64px;height:64px}}
 .lab-box{display:flex;align-items:center;gap:16px;flex-wrap:wrap;--c:#3ef2ff;border-color:color-mix(in srgb,var(--c) 45%,var(--line));background:linear-gradient(110deg,rgba(62,242,255,.1),rgba(255,61,139,.1)),var(--panel)}
 .lab-box .box-art{width:64px;height:64px;flex:none}
 .lab-box b{font-family:var(--f-display);font-size:22px;font-weight:400;display:block}
@@ -342,8 +357,9 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
       <div><div class="eyebrow">Box et talents permanents</div><h2 class="h2">Labo</h2></div>
       <div style="display:flex;gap:14px;align-items:center"><div class="cores-big" id="lab-cores"></div><button class="btn cut" id="btn-lab-back">Retour</button></div>
     </div>
-    <div class="panel cut lab-box"><div class="box-art" style="color:var(--c)"></div><div><b>Box d’armes</b><small id="lab-box-sub"></small></div><button class="btn btn-gold cut" id="btn-lab-box">Ouvrir les box</button></div>
-    <div class="sec-title">TALENTS</div>
+    <div class="sec-title">BOX D’ARMES · <span id="lab-box-sub" style="letter-spacing:.06em;text-transform:none;font-weight:500"></span></div>
+    <div class="cards box-row" id="box-list"></div>
+    <div class="sec-title" style="margin-top:6px">TALENTS</div>
     <div class="cards" id="lab-talents"></div>
   </div>
 </div>
@@ -353,7 +369,7 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
   <div class="box">
     <div class="lab-head">
       <div><div class="eyebrow">Tes armes</div><h2 class="h2">Inventaire</h2></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-gold cut" id="btn-inv-box">Box</button><button class="btn cut" id="btn-inv-back">Retour</button></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-gold cut" id="btn-inv-box">Box &amp; labo</button><button class="btn cut" id="btn-inv-back">Retour</button></div>
     </div>
     <p class="help">Clique sur une arme pour l’équiper au départ. <b>3 exemplaires identiques</b> fusionnent en une rareté supérieure. En partie, seules tes armes peuvent apparaître, avec ta meilleure rareté.</p>
     <div class="cards" id="inv-grid"></div>
@@ -363,16 +379,6 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 </div>
 
 <!-- BOX -->
-<div class="screen" id="scr-box" hidden>
-  <div class="box">
-    <div class="lab-head">
-      <div><div class="eyebrow">Tente ta chance</div><h2 class="h2">Box</h2></div>
-      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div class="cores-big" id="box-cores"></div><button class="btn cut" id="btn-box-inv">Inventaire</button><button class="btn cut" id="btn-box-back">Retour</button></div>
-    </div>
-    <p class="help">Chaque box contient une arme au hasard. Les box se gagnent aussi en battant les boss (et parfois les élites).</p>
-    <div class="cards" id="box-list"></div>
-  </div>
-</div>
 <div id="box-open" hidden><div class="bo-stage" id="bo-stage"></div></div>
 <div class="ver" id="ver"></div>
 
@@ -414,7 +420,7 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
     <div><div class="eyebrow">Partie en cours</div><h2 class="h2">Pause</h2></div>
     <button class="btn btn-gold cut" id="btn-resume">Reprendre</button>
     <button class="btn cut" id="btn-mute-pause">Son : activé</button>
-    <button class="btn cut" id="btn-quit">Abandonner la partie</button>
+    <button class="btn cut" id="btn-quit">Abandonner (aucun noyau gagné)</button>
   </div>
 </div>
 
@@ -448,7 +454,7 @@ function compact(a){let j=0;for(let i=0;i<a.length;i++){const o=a[i];if(!o.dead)
 function segDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1;const l=dx*dx+dy*dy;let t=l?((px-x1)*dx+(py-y1)*dy)/l:0;t=clamp(t,0,1);const cx=x1+dx*t-px,cy=y1+dy*t-py;return Math.sqrt(cx*cx+cy*cy);}
 function fmtTime(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 
-const VERSION='0.5';
+const VERSION='0.6';
 // Mode duo suspendu : le code réseau reste en place mais n'est plus maintenu ni accessible
 const DUO_ENABLED=false;
 /* ================= SAVE ================= */
@@ -542,6 +548,7 @@ const ICON={
  chip:'<rect x="6.5" y="6.5" width="11" height="11" rx="1"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9 3v3.5M12 3v3.5M15 3v3.5M9 17.5V21M12 17.5V21M15 17.5V21M3 9h3.5M3 12h3.5M3 15h3.5M17.5 9H21M17.5 12H21M17.5 15H21"/>',
  wallet:'<path d="M3.5 7.5h15a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-15z"/><path d="M3.5 7.5l11-4 1.5 4"/><path d="M15 13.5h5.5v3H15a1.5 1.5 0 0 1 0-3z"/>',
  reroll:'<path d="M19.5 9A8 8 0 0 0 5 7.5M4.5 15A8 8 0 0 0 19 16.5"/><path d="M5 3.5v4h4M19 20.5v-4h-4"/>',
+ arsenal:'<rect x="3" y="4" width="8" height="7" rx="1"/><rect x="13" y="4" width="8" height="7" rx="1"/><rect x="3" y="13" width="8" height="7" rx="1"/><path d="M17 14v5M14.5 16.5h5"/>',
  cards:'<rect x="3" y="6" width="10" height="14" rx="1" transform="rotate(-10 8 13)"/><rect x="10" y="4" width="10" height="14" rx="1" transform="rotate(8 15 11)"/>',
  revive:'<path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/><path d="M12 8v7M8.5 11.5h7"/>',
  box:'<path d="M12 2.5l8.5 4.5v10L12 21.5 3.5 17V7z"/><path d="M3.5 7L12 11.5 20.5 7M12 11.5v10"/><path d="M7.8 4.8l8.5 4.5"/>',
@@ -701,6 +708,7 @@ const PASSIVES={
  if(!save.inv.some(x=>x.u===save.equip))save.equip=save.inv[0].u;
  save.boxes=Object.assign({std:0,prem:0},save.boxes);persist();})();
 const TALENTS=[
+ {id:'slot',icon:'arsenal',col:'#3ef2ff',name:'Arsenal',desc:'+1 emplacement d’arme en partie',max:3,costs:[120,260,450]},
  {id:'hp',icon:'heart',col:'#ff4a6b',name:'Vitalité',desc:'+10 PV max',max:5,cost:10},
  {id:'dmg',icon:'powder',col:'#ffb03e',name:'Puissance',desc:'+5% de dégâts',max:5,cost:14},
  {id:'spd',icon:'boots',col:'#3ef2ff',name:'Agilité',desc:'+4% de vitesse',max:4,cost:10},
@@ -848,7 +856,8 @@ function initFloor(){floorPat=ctx.createPattern(makeFloor(),'repeat');try{floorP
 let G=null,P=null,ME=0;
 const demo={cam:{x:0,y:0},ens:[]};
 function T(id){return save.talents[id]||0;}
-function talentStats(){return{hp:10*T('hp'),dmg:.05*T('dmg'),spd:.04*T('spd'),mag:.15*T('mag'),gold:.1*T('gold'),startGold:20*T('start'),armor:.04*T('armor'),freeRerolls:T('reroll'),choice:T('choice'),revive:T('revive')};}
+function talentCost(t,l){return t.costs?t.costs[l]:t.cost*(l+1);}
+function talentStats(){return{slots:1+T('slot'),hp:10*T('hp'),dmg:.05*T('dmg'),spd:.04*T('spd'),mag:.15*T('mag'),gold:.1*T('gold'),startGold:20*T('start'),armor:.04*T('armor'),freeRerolls:T('reroll'),choice:T('choice'),revive:T('revive')};}
 function xpFor(l){return Math.round(5+l*5+l*l*.35);}
 function withP(pl,fn){const o=P;P=pl;try{return fn();}finally{P=o;}}
 
@@ -1027,7 +1036,7 @@ function bossAI(e,dt,dx,dy){const A=e.ai;const V=BOSSV[e.bv||'crown'];const col=
  e.x+=(mx*sp+e.kx)*dt;e.y+=(my*sp+e.ky)*dt;}
 
 /* ================= OPTIONS (level / chest / shop) ================= */
-function candidates(ctx){const list=[];const wSlots=P.weapons.length<6,pSlots=Object.keys(P.passives).length<6;
+function candidates(ctx){const list=[];const wSlots=P.weapons.length<P.ts.slots,pSlots=Object.keys(P.passives).length<6;
  for(const w of P.weapons){const d=WEAPONS[w.id];if(w.lvl<5)list.push({kind:'wup',id:w.id,w:10});else if(!w.evo&&P.passives[d.evoWith]&&ctx!=='shop')list.push({kind:'evo',id:w.id,w:40});}
  if(wSlots)for(const id in P.owned)if(!getW(id))list.push({kind:'wnew',id,w:ctx==='shop'?7:5});
  for(const id in P.passives)if(P.passives[id]<PASSIVES[id].max)list.push({kind:'pup',id,w:8});
@@ -1037,7 +1046,7 @@ function candidates(ctx){const list=[];const wSlots=P.weapons.length<6,pSlots=Ob
 function weightedPicks(pool,n){pool=pool.slice();const out=[];while(out.length<n&&pool.length){let tot=0;for(const o of pool)tot+=o.w;let r=Math.random()*tot,k=0;for(;k<pool.length-1;k++){r-=pool[k].w;if(r<=0)break;}out.push(pool.splice(k,1)[0]);}return out;}
 function rollOptions(n,ctx){const c=candidates(ctx);const out=[];if(ctx==='chest'){const evo=c.find(o=>o.kind==='evo');if(evo)out.push(evo);}
  out.push(...weightedPicks(c.filter(o=>!out.includes(o)),n-out.length));const fill=[{kind:'gold',id:'gold'},{kind:'heal',id:'heal'}];let i=0;while(out.length<n)out.push(fill[i++%2]);return out;}
-function validOpt(o){switch(o.kind){case'wnew':return!getW(o.id)&&P.weapons.length<6;case'wup':{const w=getW(o.id);return!!w&&w.lvl<5;}case'evo':{const w=getW(o.id);return!!w&&!w.evo&&w.lvl>=5&&!!P.passives[WEAPONS[o.id].evoWith];}
+function validOpt(o){switch(o.kind){case'wnew':return!getW(o.id)&&P.weapons.length<P.ts.slots;case'wup':{const w=getW(o.id);return!!w&&w.lvl<5;}case'evo':{const w=getW(o.id);return!!w&&!w.evo&&w.lvl>=5&&!!P.passives[WEAPONS[o.id].evoWith];}
  case'pnew':return!P.passives[o.id]&&Object.keys(P.passives).length<6;case'pup':return!!P.passives[o.id]&&P.passives[o.id]<PASSIVES[o.id].max;default:return true;}}
 function goldBonus(){return 20+6*G.wave;}
 function applyOpt(o){switch(o.kind){
@@ -1070,7 +1079,7 @@ function cardHTML(i,idx,extra=''){return `<button class="card cut ${i.evo?'evo':
 function act(a,i){if(!G)return;if(NET.role==='guest'&&G.guest){netSend({t:'act',a,i});return;}doAct(G.players[ME],a,i);}
 function doAct(pl,a,i){if(!G||!pl)return;
  switch(a){case'pick':pickFor(pl,i);break;case'buy':buyFor(pl,i);break;case'reroll':rerollFor(pl);break;case'lock':lockFor(pl,i);break;
-  case'ready':readyFor(pl);break;case'pause':pause();break;case'resume':resume();break;case'quit':if(G.state!=='over'){show(null);gameOver(false);}break;}}
+  case'ready':readyFor(pl);break;case'pause':pause();break;case'resume':resume();break;case'quit':if(G.state!=='over'){show(null);gameOver(false,true);}break;}}
 // Son / toast destinés à un seul joueur
 function say(pl,n,arg){if(pl.i===ME){if(SfxRaw[n])SfxRaw[n]();if(n==='deny')shakeCard(arg);}else netSend({t:'say',n,arg});}
 function toastFor(pl,a,b,c){if(pl.i===ME)toastRaw(a,b,c);else netSend({t:'toast',a:[a,b,c]});}
@@ -1125,7 +1134,7 @@ function shopView(pl){return withP(pl,()=>{const coins=Math.floor(P.coins);const
  v.next=P.ready?'En attente du partenaire…':`${isBossWave(nx)?(isFinal(nx)?'Boss final':'Vague '+nx+' · Boss'):'Vague '+nx}${duo?' · Prêt':''} → <kbd>Entrée</kbd>`;v.nextDis=P.ready;
  v.weapons=P.weapons.map(w=>{const d=WEAPONS[w.id];const pn=PASSIVES[d.evoWith].name;const has=!!P.passives[d.evoWith];
   const em=w.evo?`<em class="ok">Évolué</em>`:`<em class="${w.lvl>=5&&has?'ok':''}">Évo ${d.evoName} : niv 5${w.lvl>=5?' ✓':''} + ${pn}${has?' ✓':''}</em>`;
-  return `<div class="loadrow"><span class="ico" style="--c:${w.evo?'#ffd23e':d.col}">${svg(w.id)}</span><div><b>${w.evo?d.evoName:d.name} <span class="rar" style="--rc:${RARITY[w.r||0].col}">${RARITY[w.r||0].name}</span></b>${em}</div>${pips({from:w.lvl,to:w.lvl,max:5}).replace('class="pips"',`class="pips" style="--c:${d.col}"`)}</div>`;}).join('')+(P.weapons.length<6?`<p class="empty">${6-P.weapons.length} emplacement(s) libre(s)</p>`:'');
+  return `<div class="loadrow"><span class="ico" style="--c:${w.evo?'#ffd23e':d.col}">${svg(w.id)}</span><div><b>${w.evo?d.evoName:d.name} <span class="rar" style="--rc:${RARITY[w.r||0].col}">${RARITY[w.r||0].name}</span></b>${em}</div>${pips({from:w.lvl,to:w.lvl,max:5}).replace('class="pips"',`class="pips" style="--c:${d.col}"`)}</div>`;}).join('')+(P.weapons.length<P.ts.slots?`<p class="empty">${P.ts.slots-P.weapons.length} emplacement(s) d’arme libre(s)</p>`:`<p class="empty">${P.ts.slots} emplacement${P.ts.slots>1?'s':''} d’arme · plus au labo (Arsenal)</p>`);
  const pk=Object.keys(P.passives);v.passives=pk.length?pk.map(id=>{const d=PASSIVES[id];return `<div class="loadrow"><span class="ico" style="--c:${PCOL}">${svg(id)}</span><div><b>${d.name}</b><em>${d.desc}</em></div>${pips({from:P.passives[id],to:P.passives[id],max:d.max}).replace('class="pips"',`class="pips" style="--c:${PCOL}"`)}</div>`;}).join(''):'<p class="empty">Aucun équipement. Il s’achète ici ou se gagne en montant de niveau.</p>';
  const st=[['PV',`${Math.ceil(P.hp)} / ${P.maxHp}`],['Dégâts',`+${Math.round((P.dmg-1)*100)}%`],['Recharge',`-${Math.round((1-P.cd)*100)}%`],['Critique',`${Math.round(P.crit*100)}% · ×${P.critMul.toFixed(2)}`],['Vitesse',`${Math.round(P.speed)}`],['Zone',`+${Math.round((P.area-1)*100)}%`],['Portée',`+${Math.round((P.range-1)*100)}%`],['Projectiles',`+${P.proj}`],['Armure',`-${Math.round((1-P.armor)*100)}%`],['Régénération',`${P.regen.toFixed(1)} PV/s`],['Collecte',`${Math.round(P.magnet)}`]];
  v.stats=st.map(([k,x])=>`<dt>${k}</dt><dd>${x}</dd>`).join('');
@@ -1145,21 +1154,21 @@ function readyFor(pl){if(G.state!=='shop')return;pl.ready=true;if(G.players.ever
 function nextWave(){if(G.state!=='shop')return;show(null);for(const p of G.players)p.inv=1.2;G.ebullets.length=0;startWave(G.wave+1);}
 
 /* ================= GAME OVER ================= */
-function gameOver(win){G.state='over';joy=null;
- const d={win,mode:G.mode,wave:G.wave,kills:G.kills,bossKills:G.bossKills,time:G.time,maxCombo:G.maxCombo,dmg:Math.round(G.dmgDone),level:G.level,coins:Math.floor(G.coinsEarned),duo:G.players.length>1,boxes:G.boxes};
+function gameOver(win,quit){G.state='over';joy=null;
+ const d={win,mode:G.mode,wave:G.wave,kills:G.kills,bossKills:G.bossKills,time:G.time,maxCombo:G.maxCombo,dmg:Math.round(G.dmgDone),level:G.level,coins:Math.floor(G.coinsEarned),duo:G.players.length>1,boxes:G.boxes,quit:!!quit};
  netSend({t:'over',d});showOver(d);}
 // Chaque joueur calcule ses noyaux et records avec sa propre sauvegarde
 function showOver(d){const M=MODES[d.mode];const waves=d.win?d.wave:d.wave-1;
- let cores=Math.floor(waves*3+d.kills/40+d.bossKills*8+(d.win?(d.mode==='marathon'?45:20):0));cores=Math.max(1,cores);
+ let cores=Math.floor(waves*3+d.kills/40+d.bossKills*8+(d.win?(d.mode==='marathon'?45:20):0));cores=d.quit?0:Math.max(1,cores);
  save.cores+=cores;save.totalKills=(save.totalKills||0)+d.kills;if(d.win)save.wins++;
  const b=save.best[d.mode]||0;const newRec=d.wave>b;if(newRec)save.best[d.mode]=d.wave;persist();
  $('#over-box').className='box over '+(d.win?'win':'lose');
- $('#over-title').textContent=d.win?'VICTOIRE':(d.duo?'VOUS AVEZ CHUTÉ':'TU AS CHUTÉ');
+ $('#over-title').textContent=d.win?'VICTOIRE':d.quit?'ABANDON':(d.duo?'VOUS AVEZ CHUTÉ':'TU AS CHUTÉ');
  $('#over-sub').textContent=`${M.name}${d.duo?' · duo':''} · ${d.win?'toutes les vagues tenues':'vague '+d.wave}${newRec?' · nouveau record':''}`;
  const st=[['Vague atteinte',M.endless?d.wave:`${d.wave} / ${M.waves}`],['Temps',fmtTime(d.time)],['Éliminations',d.kills],['Meilleur combo',d.maxCombo],['Dégâts infligés',d.dmg.toLocaleString('fr-FR')],['Niveau',d.level],['Pièces gagnées',d.coins]];
  $('#over-stats').innerHTML=st.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('');
  const bx=d.boxes||{};save.boxes.std+=bx.std|0;save.boxes.prem+=bx.prem|0;persist();
- $('#over-reward').innerHTML=svg('core',2)+`+${cores} noyaux`+((bx.std|0)?` <span class="rw-box" style="--c:${BOXES.std.col}">${svg('box',2)}+${bx.std} ${BOXES.std.name}</span>`:'')+((bx.prem|0)?` <span class="rw-box" style="--c:${BOXES.prem.col}">${svg('box',2)}+${bx.prem} ${BOXES.prem.name}</span>`:'');
+ $('#over-reward').innerHTML=(d.quit?`<span style="font-size:15px;color:var(--dim);font-family:var(--f-ui)">Partie abandonnée : aucun noyau.</span>`:svg('core',2)+`+${cores} noyaux`)+((bx.std|0)?` <span class="rw-box" style="--c:${BOXES.std.col}">${svg('box',2)}+${bx.std} ${BOXES.std.name}</span>`:'')+((bx.prem|0)?` <span class="rw-box" style="--c:${BOXES.prem.col}">${svg('box',2)}+${bx.prem} ${BOXES.prem.name}</span>`:'');
  const guest=NET.role==='guest'&&d.duo;const again=$('#btn-again');again.disabled=guest;again.textContent=guest?'L’hôte relance…':'Rejouer';
  $('#hud').hidden=true;show('scr-over');}
 
@@ -1312,7 +1321,7 @@ addEventListener('keydown',e=>{Sfx.init();Sfx.resume();
  if(e.repeat)return;
  if(e.code==='KeyM'){toggleMute();return;}
  const cur=currentScreen();
- if(e.code==='Escape'||e.code==='KeyP'){if(G&&G.state==='play')act('pause');else if(cur==='scr-pause')act('resume');else if(cur==='scr-lab'||cur==='scr-inv'||cur==='scr-box'){if(!$('#box-open').hidden)return;openMenu();}return;}
+ if(e.code==='Escape'||e.code==='KeyP'){if(G&&G.state==='play')act('pause');else if(cur==='scr-pause')act('resume');else if(cur==='scr-lab'||cur==='scr-inv'){if(!$('#box-open').hidden)return;openMenu();}return;}
  if(cur==='scr-level'&&/^Digit[1-4]$/.test(e.code)){chooseLevel(+e.code.slice(5)-1);return;}
  if(cur==='scr-shop'){if(e.code==='KeyR')act('reroll');else if(e.code==='Enter')act('ready');else if(/^Digit[1-4]$/.test(e.code))act('buy',+e.code.slice(5)-1);return;}
  if(cur==='scr-menu'&&e.code==='Enter'&&e.target.tagName!=='INPUT'){startGame();return;}
@@ -1384,9 +1393,8 @@ function renderDuo(){const el=$('#duo-panel');const duo=save.players==='duo';el.
  el.innerHTML=h;const pre=$('#net-log');if(pre)pre.scrollTop=pre.scrollHeight;
  el.querySelector('details').addEventListener('toggle',ev=>{NET.logOpen=ev.target.open;});}
 function renderLab(){$('#lab-cores').innerHTML=svg('core',2)+`<span class="num">${save.cores}</span>`;
- const nb=save.boxes.std+save.boxes.prem;$('#lab-box-sub').textContent=(nb?nb+' box à ouvrir · ':'')+Object.values(BOXES).map(B=>B.name+' '+B.cost+' noyaux').join(' · ');
- $('#btn-lab-box').innerHTML='Ouvrir les box'+(nb?` <span class="badge">${nb}</span>`:'');document.querySelector('.lab-box .box-art').innerHTML=svg('box',1.4);
- $('#lab-talents').innerHTML=TALENTS.map((t,i)=>{const l=T(t.id);const max=l>=t.max;const cost=t.cost*(l+1);
+ const nb=save.boxes.std+save.boxes.prem;$('#lab-box-sub').textContent=nb?nb+' à ouvrir':'une arme au hasard, aussi lâchées par les boss';renderBox();
+ $('#lab-talents').innerHTML=TALENTS.map((t,i)=>{const l=T(t.id);const max=l>=t.max;const cost=talentCost(t,l);
   return `<button class="card cut tal" data-t="${i}" ${max||save.cores<cost?'aria-disabled="true"':''} style="--c:${t.col}"><div class="card-top"><span class="ico">${svg(t.icon)}</span><span class="tag">${max?'MAX':'NIV '+l+' / '+t.max}</span></div><div class="card-name">${t.name}</div>${pips({from:l,to:l,max:t.max})}<p class="card-desc">${t.desc}</p><div class="price-row"><span class="price ${!max&&save.cores<cost?'poor':''}">${max?'MAX':svg('core',2)+cost}</span></div></button>`;}).join('');}
 /* ---------- Inventaire & box ---------- */
 function stacks(){const m=new Map();for(const it of save.inv){const k=it.id+'|'+it.r;if(!m.has(k))m.set(k,{id:it.id,r:it.r,items:[]});m.get(k).items.push(it);}
@@ -1408,7 +1416,7 @@ function equipStack(key){const[id,r]=key.split('|');const it=save.inv.find(x=>x.
 function fuse(key){const[id,r0]=key.split('|');const r=+r0;const its=save.inv.filter(x=>x.id===id&&x.r===r);if(its.length<3||r>=4){Sfx.deny();return;}
  const used=its.slice(0,3);const wasEq=used.some(x=>x.u===save.equip);save.inv=save.inv.filter(x=>!used.includes(x));const nu={u:save.uid++,id,r:r+1};save.inv.push(nu);if(wasEq)save.equip=nu.u;persist();
  renderInv();showReveal(nu,false,'FUSION !');}
-function renderBox(){$('#box-cores').innerHTML=svg('core',2)+`<span class="num">${save.cores}</span>`;
+function renderBox(){
  $('#box-list').innerHTML=Object.entries(BOXES).map(([k,B])=>{const n=save.boxes[k];const tot=B.odds.reduce((a,b)=>a+b,0);
   return `<div class="card cut box-card" style="--c:${B.col}"><div class="card-top"><span class="tag">${n?n+' EN STOCK':'BOX'}</span></div><div class="box-art">${svg('box',1.4)}</div><div class="card-name">${B.name}</div>
    <dl class="odds">${B.odds.map((o,r)=>o?`<dt style="--rc:${RARITY[r].col}">${RARITY[r].name}</dt><dd>${(o/tot*100).toFixed(o/tot<.01?1:0)}%</dd>`:'').join('')}</dl>
@@ -1438,7 +1446,7 @@ function showReveal(it,isNew,title){const ov=$('#box-open');ov.hidden=false;cons
  ov.onclick=e=>{const b=e.target.closest('[data-again]');if(!b)return;const a=b.dataset.again;
   if(a==='open')openBox(k,false);else if(a==='buy')openBox(k,true);
   else{if(a==='equip'){save.equip=it.u;persist();}ov.hidden=true;refreshMeta();}};}
-function refreshMeta(){const c=currentScreen();if(c==='scr-box')renderBox();else if(c==='scr-lab')renderLab();else if(c==='scr-inv')renderInv();else if(c==='scr-menu')renderMenu();}
+function refreshMeta(){const c=currentScreen();if(c==='scr-lab')renderLab();else if(c==='scr-inv')renderInv();else if(c==='scr-menu')renderMenu();}
 function flashDeny(el){Sfx.deny();if(el){el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');}}
 
 $('#players-seg').addEventListener('click',e=>{const b=e.target.closest('[data-players]');if(!b||b.disabled)return;const v=b.dataset.players;Sfx.init();Sfx.click();if(v===save.players)return;
@@ -1459,16 +1467,15 @@ $('#duo-panel').addEventListener('input',e=>{if(e.target.id==='code-in'){e.targe
 $('#btn-play').addEventListener('click',startGame);
 const openInv=()=>{Sfx.init();Sfx.click();renderInv();show('scr-inv');};
 // les box s'ouvrent depuis le labo (ou l'inventaire) ; « Retour » ramène à l'écran d'origine
-let boxFrom='scr-lab';
-const openBoxes=()=>{boxFrom=currentScreen()==='scr-inv'?'scr-inv':'scr-lab';Sfx.init();Sfx.click();renderBox();show('scr-box');};
-$('#btn-inv').addEventListener('click',openInv);$('#btn-lab-box').addEventListener('click',openBoxes);$('#equip-card').addEventListener('click',openInv);
-$('#btn-inv-box').addEventListener('click',openBoxes);$('#btn-box-inv').addEventListener('click',openInv);
-$('#btn-inv-back').addEventListener('click',()=>{renderMenu();show('scr-menu');});$('#btn-box-back').addEventListener('click',()=>{if(boxFrom==='scr-inv')renderInv();else renderLab();show(boxFrom);});
+const openBoxes=()=>{Sfx.init();Sfx.click();renderLab();show('scr-lab');};
+$('#btn-inv').addEventListener('click',openInv);$('#equip-card').addEventListener('click',openInv);
+$('#btn-inv-box').addEventListener('click',openBoxes);
+$('#btn-inv-back').addEventListener('click',()=>{renderMenu();show('scr-menu');});
 $('#inv-grid').addEventListener('click',e=>{const f=e.target.closest('[data-fuse]');if(f){if(!f.disabled)fuse(f.dataset.fuse);return;}const q=e.target.closest('[data-eq]');if(q)equipStack(q.dataset.eq);});
 $('#box-list').addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){openBox(o.dataset.open,false);return;}const b=e.target.closest('[data-buy]');if(b&&!b.disabled)openBox(b.dataset.buy,true);});
 $('#btn-lab').addEventListener('click',()=>{Sfx.init();renderLab();show('scr-lab');});
 $('#btn-lab-back').addEventListener('click',()=>{renderMenu();show('scr-menu');});
-$('#lab-talents').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;const t=TALENTS[+b.dataset.t];const l=T(t.id);const cost=t.cost*(l+1);
+$('#lab-talents').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;const t=TALENTS[+b.dataset.t];const l=T(t.id);const cost=talentCost(t,l);
  if(l>=t.max||save.cores<cost){flashDeny(b);return;}save.cores-=cost;save.talents[t.id]=l+1;persist();Sfx.buy();renderLab();});
 $('#lv-cards').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)chooseLevel(+b.dataset.i);});
 $('#shop-cards').addEventListener('click',e=>{const l=e.target.closest('[data-lock]');if(l){e.stopPropagation();act('lock',+l.dataset.lock);return;}const b=e.target.closest('[data-i]');if(b)act('buy',+b.dataset.i);});
