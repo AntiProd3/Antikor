@@ -497,7 +497,7 @@ function compact(a){let j=0;for(let i=0;i<a.length;i++){const o=a[i];if(!o.dead)
 function segDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1;const l=dx*dx+dy*dy;let t=l?((px-x1)*dx+(py-y1)*dy)/l:0;t=clamp(t,0,1);const cx=x1+dx*t-px,cy=y1+dy*t-py;return Math.sqrt(cx*cx+cy*cy);}
 function fmtTime(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 
-const VERSION='0.7.2';
+const VERSION='0.7.3';
 // Mode duo suspendu : le code réseau reste en place mais n'est plus maintenu ni accessible
 const DUO_ENABLED=false;
 /* ================= SAVE ================= */
@@ -893,31 +893,23 @@ function splat(col){if(SPLAT[col])return SPLAT[col];const arr=[];for(let v=0;v<3
  g.beginPath();const n=11;for(let i=0;i<=n;i++){const a=i/n*TAU;const rr=20+Math.random()*12;i?g.lineTo(Math.cos(a)*rr,Math.sin(a)*rr):g.moveTo(Math.cos(a)*rr,Math.sin(a)*rr);}g.fill();
  for(let k=0;k<7;k++){const a=Math.random()*TAU,d=28+Math.random()*16;g.beginPath();g.arc(Math.cos(a)*d,Math.sin(a)*d,2+Math.random()*4,0,TAU);g.fill();}
  g.globalCompositeOperation='destination-out';g.fillStyle='rgba(0,0,0,.45)';g.beginPath();g.arc(0,0,12,0,TAU);g.fill();arr.push(c);}SPLAT[col]=arr;return arr;}
-function makeFloor(){const T=320,S=2;const c=document.createElement('canvas');c.width=c.height=T*S;const g=c.getContext('2d');g.scale(S,S);
- g.fillStyle='#070b16';g.fillRect(0,0,T,T);
- for(let i=0;i<4;i++)for(let j=0;j<4;j++)if((i+j)%2){g.fillStyle='rgba(40,70,140,0.045)';g.fillRect(i*80,j*80,80,80);}
- g.strokeStyle='#0f1a33';g.lineWidth=1;g.beginPath();for(let i=1;i<4;i++){g.moveTo(i*80+.5,0);g.lineTo(i*80+.5,T);g.moveTo(0,i*80+.5);g.lineTo(T,i*80+.5);}g.stroke();
- g.strokeStyle='#18305e';g.lineWidth=1.5;g.beginPath();g.moveTo(.75,0);g.lineTo(.75,T);g.moveTo(0,.75);g.lineTo(T,.75);g.stroke();
- g.strokeStyle='#26447f';g.lineWidth=1.2;g.beginPath();for(let i=0;i<4;i++)for(let j=0;j<4;j++){const x=i*80,y=j*80;g.moveTo(x-4,y);g.lineTo(x+4,y);g.moveTo(x,y-4);g.lineTo(x,y+4);}g.stroke();
+// pal : couleurs du sol (FLOOR = normal, FLOOR_LIT = même grille éclaircie pendant les boss)
+const FLOOR={bg:'#070b16',chk:'rgba(40,70,140,0.045)',grid:'#0f1a33',main:'#18305e',cross:'#26447f',d1:'#101d3a',d2:'#142650',d3:'#132852'};
+const FLOOR_LIT={bg:'#0f1832',chk:'rgba(70,110,200,0.09)',grid:'#1f3668',main:'#3a62b4',cross:'#5a8ff0',d1:'#21397a',d2:'#284a94',d3:'#27488c'};
+function makeFloor(pal=FLOOR){const T=320,S=2;const c=document.createElement('canvas');c.width=c.height=T*S;const g=c.getContext('2d');g.scale(S,S);
+ g.fillStyle=pal.bg;g.fillRect(0,0,T,T);
+ for(let i=0;i<4;i++)for(let j=0;j<4;j++)if((i+j)%2){g.fillStyle=pal.chk;g.fillRect(i*80,j*80,80,80);}
+ g.strokeStyle=pal.grid;g.lineWidth=1;g.beginPath();for(let i=1;i<4;i++){g.moveTo(i*80+.5,0);g.lineTo(i*80+.5,T);g.moveTo(0,i*80+.5);g.lineTo(T,i*80+.5);}g.stroke();
+ g.strokeStyle=pal.main;g.lineWidth=1.5;g.beginPath();g.moveTo(.75,0);g.lineTo(.75,T);g.moveTo(0,.75);g.lineTo(T,.75);g.stroke();
+ g.strokeStyle=pal.cross;g.lineWidth=1.2;g.beginPath();for(let i=0;i<4;i++)for(let j=0;j<4;j++){const x=i*80,y=j*80;g.moveTo(x-4,y);g.lineTo(x+4,y);g.moveTo(x,y-4);g.lineTo(x,y+4);}g.stroke();
  let seed=11;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
- g.strokeStyle='#101d3a';g.lineWidth=1;for(let k=0;k<6;k++){let x=rnd()*T,y=rnd()*T;g.beginPath();g.moveTo(x,y);for(let s=0;s<5;s++){x+=rnd()*24-12;y+=rnd()*24-12;g.lineTo(x,y);}g.stroke();}
- g.strokeStyle='#142650';for(let k=0;k<4;k++){g.beginPath();g.arc(rnd()*T,rnd()*T,3+rnd()*6,0,TAU);g.stroke();}
- g.strokeStyle='#132852';g.lineWidth=1.5;for(let k=0;k<2;k++){const x=rnd()*(T-60)+20,y=rnd()*(T-30)+10;g.beginPath();for(let s=0;s<3;s++){g.moveTo(x+s*10,y);g.lineTo(x+s*10+6,y+6);g.lineTo(x+s*10,y+12);}g.stroke();}
- return c;}
-// Sol des manches de boss : tissu infecté (cellules, noyaux, vaisseaux), en fondu par-dessus le sol normal
-function makeBossFloor(){const T=640,S=1;const c=document.createElement('canvas');c.width=c.height=T*S;const g=c.getContext('2d');g.scale(S,S);
- g.fillStyle='#0d0509';g.fillRect(0,0,T,T);
- let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
- const wrap=f=>{for(const ox of[-T,0,T])for(const oy of[-T,0,T]){g.save();g.translate(ox,oy);f();g.restore();}};
- const cells=[];for(let k=0;k<70;k++)cells.push({x:rnd()*T,y:rnd()*T,rx:12+rnd()*20,ry:10+rnd()*15,a:rnd()*Math.PI,nx:rnd()*.5-.25,ny:rnd()*.5-.25});
- const veins=[];for(let k=0;k<6;k++){let x=rnd()*T,y=rnd()*T,a=rnd()*TAU;const pts=[[x,y]];for(let s=0;s<9;s++){a+=rnd()*.9-.45;x+=Math.cos(a)*45;y+=Math.sin(a)*45;pts.push([x,y]);}veins.push(pts);}
- wrap(()=>{g.strokeStyle='rgba(120,20,48,.4)';g.lineWidth=3;g.lineCap='round';g.lineJoin='round';for(const v of veins){g.beginPath();g.moveTo(v[0][0],v[0][1]);for(let i=1;i<v.length-1;i++){const mx=(v[i][0]+v[i+1][0])/2,my=(v[i][1]+v[i+1][1])/2;g.quadraticCurveTo(v[i][0],v[i][1],mx,my);}g.stroke();}
-  for(const q of cells){g.save();g.translate(q.x,q.y);g.rotate(q.a);g.fillStyle='rgba(70,12,30,.45)';g.strokeStyle='rgba(170,36,80,.38)';g.lineWidth=1.4;g.beginPath();g.ellipse(0,0,q.rx,q.ry,0,0,TAU);g.fill();g.stroke();
-   g.fillStyle='rgba(200,50,100,.28)';g.beginPath();g.ellipse(q.rx*q.nx,q.ry*q.ny,q.rx*.28,q.ry*.3,0,0,TAU);g.fill();g.restore();}});
+ g.strokeStyle=pal.d1;g.lineWidth=1;for(let k=0;k<6;k++){let x=rnd()*T,y=rnd()*T;g.beginPath();g.moveTo(x,y);for(let s=0;s<5;s++){x+=rnd()*24-12;y+=rnd()*24-12;g.lineTo(x,y);}g.stroke();}
+ g.strokeStyle=pal.d2;for(let k=0;k<4;k++){g.beginPath();g.arc(rnd()*T,rnd()*T,3+rnd()*6,0,TAU);g.stroke();}
+ g.strokeStyle=pal.d3;g.lineWidth=1.5;for(let k=0;k<2;k++){const x=rnd()*(T-60)+20,y=rnd()*(T-30)+10;g.beginPath();for(let s=0;s<3;s++){g.moveTo(x+s*10,y);g.lineTo(x+s*10+6,y+6);g.lineTo(x+s*10,y+12);}g.stroke();}
  return c;}
 let floorPat=null,bossPat=null;const BVIGN={};
 function bossVign(col){return BVIGN[col]||(BVIGN[col]=makeVign(hexA(col,.75)));}
-function initFloor(){floorPat=ctx.createPattern(makeFloor(),'repeat');bossPat=ctx.createPattern(makeBossFloor(),'repeat');try{floorPat.setTransform(new DOMMatrix([.5,0,0,.5,0,0]));}catch(e){}}
+function initFloor(){floorPat=ctx.createPattern(makeFloor(),'repeat');bossPat=ctx.createPattern(makeFloor(FLOOR_LIT),'repeat');try{floorPat.setTransform(new DOMMatrix([.5,0,0,.5,0,0]));bossPat.setTransform(new DOMMatrix([.5,0,0,.5,0,0]));}catch(e){}}
 
 /* ================= STATE ================= */
 // G = partie en cours, P = joueur « courant » (celui dont on exécute les armes / options), ME = index du joueur local
