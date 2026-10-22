@@ -60,9 +60,10 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 #scr-menu{background:radial-gradient(ellipse at 30% 40%,rgba(5,8,18,.2),rgba(2,3,8,.82))}
 .menu{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:28px;align-items:start}
 .menu-main{display:flex;flex-direction:column;gap:20px;min-width:0}
-.logo{font-family:var(--f-display);font-size:clamp(56px,min(12vw,13.5vh),124px);line-height:.86;margin:0;letter-spacing:.01em}
-.logo .l1{display:block;color:var(--cyan);text-shadow:0 0 6px rgba(62,242,255,.9),0 0 28px rgba(62,242,255,.55),0 0 60px rgba(62,242,255,.3)}
-.logo .l2{display:block;color:var(--mag);text-shadow:0 0 6px rgba(255,61,139,.9),0 0 28px rgba(255,61,139,.55),0 0 60px rgba(255,61,139,.3);animation:flick 5s 1.2s infinite}
+.menu-main{container-type:inline-size}
+.logo{font-family:var(--f-display);font-size:clamp(40px,min(19.5cqi,15vh),120px);line-height:1;margin:0;letter-spacing:.01em;white-space:nowrap}
+.logo .l1{color:var(--cyan);text-shadow:0 0 6px rgba(62,242,255,.9),0 0 28px rgba(62,242,255,.55),0 0 60px rgba(62,242,255,.3)}
+.logo .l2{color:var(--mag);text-shadow:0 0 6px rgba(255,61,139,.9),0 0 28px rgba(255,61,139,.55),0 0 60px rgba(255,61,139,.3);animation:flick 5s 1.2s infinite}
 @keyframes flick{0%,92%,100%{opacity:1}93%{opacity:.35}94%{opacity:1}96%{opacity:.5}97%{opacity:1}}
 .tagline{color:var(--dim);font-size:16px;line-height:1.45;max-width:46ch;margin:0}
 .group{display:flex;flex-direction:column;gap:9px}
@@ -497,7 +498,7 @@ function compact(a){let j=0;for(let i=0;i<a.length;i++){const o=a[i];if(!o.dead)
 function segDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1;const l=dx*dx+dy*dy;let t=l?((px-x1)*dx+(py-y1)*dy)/l:0;t=clamp(t,0,1);const cx=x1+dx*t-px,cy=y1+dy*t-py;return Math.sqrt(cx*cx+cy*cy);}
 function fmtTime(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 
-const VERSION='0.7.3';
+const VERSION='0.7.4';
 // Mode duo suspendu : le code réseau reste en place mais n'est plus maintenu ni accessible
 const DUO_ENABLED=false;
 /* ================= SAVE ================= */
