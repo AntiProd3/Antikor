@@ -1,16 +1,18 @@
-# Néon Horde
+# Antikor
 
-Jeu d'arcade néon en un seul fichier HTML, publié avec GitHub Pages.
+Jeu d'arcade néon en un seul fichier HTML, publié avec GitHub Pages. Le corps est envahi par des germes : tu es sa dernière défense.
+
+(Anciennement « Néon Horde », renommé en v0.7 ; les sauvegardes sont reprises automatiquement.)
 
 - Jouer : https://antoinecorcos.github.io/neonhorde/
 - Code : `index.html`
 
-Version actuelle : **0.6** (affichée en bas à droite du jeu).
+Version actuelle : **0.7** (affichée en bas à droite du jeu).
 
 ## Armes, raretés et box
 
-- On commence avec un **Blaster commun** (et une Box néon offerte).
-- Les **box** s'achètent avec les noyaux (Box néon 25, Box prisme 70) ou se gagnent sur les boss et parfois les élites.
+- On commence avec un **Blaster commun** (et une Box Souche offerte).
+- Les **box** s'achètent avec les noyaux (Box Souche 25, Box Mutante 70) ou se gagnent sur les boss et parfois les élites.
 - 5 raretés : Commun, Rare, Épique, Légendaire, Mythique. Plus c'est rare, plus l'arme est forte (dégâts, recharge, zone ; Légendaire et Mythique commencent niveau 2, Mythique +1 projectile).
 - **Inventaire** (menu uniquement) : équiper son arme de départ, fusionner 3 exemplaires identiques en une rareté supérieure.
 - En partie, seules les armes possédées apparaissent, avec la meilleure rareté possédée.

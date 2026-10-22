@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Néon Horde</title>
+<title>Antikor</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -12,12 +12,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Néon Horde">
+<meta name="apple-mobile-web-app-title" content="Antikor">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:wght@400;500;600;700&display=swap">
 <style>
-/* Arcade néon plein cadre : canvas de jeu + panneaux à coins coupés par-dessus */
+/* Antikor · arcade néon plein cadre : canvas de jeu + panneaux à coins coupés par-dessus */
 :root{
   --ink:#05070e; --panel:rgba(9,14,28,.94); --line:#1f2f52; --fg:#e8f4ff; --dim:#8ea3c8;
   --cyan:#3ef2ff; --mag:#ff3d8b; --gold:#ffd23e; --green:#62ff9a; --red:#ff4a3d; --steel:#9fb6ff;
@@ -99,9 +99,30 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 .equip-card .ico{flex:none}
 .equip-card b{font-family:var(--f-display);font-size:19px;font-weight:400;display:block;line-height:1.1}
 .equip-card small{display:block;font-size:12px;color:var(--dim);margin-top:4px}
-.inv-big{font-size:16px;padding:0 26px;min-height:64px}
-@media (max-width:420px){.equip{grid-template-columns:1fr}.inv-big{min-height:52px}}
+.inv-btn{flex-direction:column;gap:4px;padding:10px 22px;min-height:64px;font-size:14px;border-color:var(--cyan);color:var(--cyan)}
+.inv-btn svg{width:22px;height:22px}.inv-btn small{font-size:11px;letter-spacing:.08em;color:var(--dim);text-transform:none}
+@media (max-width:420px){.equip{grid-template-columns:1fr}.inv-btn{flex-direction:row;min-height:48px}}
+/* Bouton labo : bordure animée, box qui flotte, badge qui pulse quand des box attendent */
+.lab-cta{position:relative;display:flex;align-items:center;gap:16px;width:100%;padding:14px 18px;cursor:pointer;text-align:left;color:var(--fg);font-family:var(--f-ui);
+ border:2px solid transparent;background:linear-gradient(105deg,rgba(14,22,44,.96),rgba(26,12,34,.96)) padding-box,linear-gradient(90deg,#3ef2ff,#ff3d8b,#ffd23e,#3ef2ff) border-box;background-size:100% 100%,300% 100%;
+ animation:ctaflow 5s linear infinite;box-shadow:0 0 26px rgba(255,61,139,.22),0 0 26px rgba(62,242,255,.16);transition:transform .12s,box-shadow .2s}
+.lab-cta:hover{transform:translateY(-2px);box-shadow:0 0 34px rgba(255,61,139,.4),0 0 34px rgba(62,242,255,.3)}
+.lab-cta:active{transform:translateY(1px)}
+@keyframes ctaflow{to{background-position:0 0,300% 0}}
+.lab-cta .box-art{width:62px;height:62px;flex:none;color:var(--cyan);animation:bob 2.4s ease-in-out infinite}
+.lab-cta.hot .box-art{color:var(--mag)}
+.lab-cta-txt{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.lab-cta-txt b{font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1;letter-spacing:.04em;background:linear-gradient(90deg,#3ef2ff,#ff3d8b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lab-cta-txt small{font-size:13px;color:var(--dim)}
+.lab-cta-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+.lab-cta-cores{display:flex;align-items:center;gap:5px;font-family:var(--f-display);font-size:20px;color:var(--gold)}.lab-cta-cores svg{width:18px;height:18px}
+.lab-cta .badge{height:22px;padding:0 9px;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.lab-cta.hot .badge{animation:bdg 1.2s ease-in-out infinite}
+@keyframes bdg{50%{box-shadow:0 0 0 6px rgba(255,61,139,0),0 0 16px rgba(255,61,139,.9);transform:scale(1.08)}}
+.lab-cta .arrow{font-family:var(--f-display);font-size:22px;color:var(--fg);opacity:.7}
+@media (prefers-reduced-motion:reduce){.lab-cta,.lab-cta .box-art,.lab-cta.hot .badge{animation:none}}
 .box-row{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.box-row .box-art{color:var(--c)}
 .box-row .box-card{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto 1fr auto;column-gap:16px;row-gap:8px;background:radial-gradient(ellipse at 15% 40%,color-mix(in srgb,var(--c) 22%,transparent),transparent 60%),linear-gradient(170deg,color-mix(in srgb,var(--c) 10%,#0a1122),#080d1a 70%)}
 .box-row .box-art{grid-row:1/5;align-self:center;width:96px;height:96px}
 .box-row .card-top,.box-row .card-name,.box-row .odds,.box-row .inv-actions{grid-column:2}
@@ -123,7 +144,14 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 .card.box-card{cursor:default;border-width:2px}
 .card.box-card:hover{transform:none}
 .box-art{width:84px;height:84px;color:var(--c);filter:drop-shadow(0 0 14px var(--c));align-self:center;animation:bob 2.4s ease-in-out infinite}
-.box-art svg{width:100%;height:100%}
+.box-art svg{width:100%;height:100%;overflow:visible}
+.bxsvg .bx-ring{transform-origin:50px 50px;animation:bxspin 7s linear infinite}
+.bxsvg .bx-core{transform-origin:50px 50px;animation:bxpulse 1.8s ease-in-out infinite}
+.bxsvg .bx-helix{transform-origin:50px 50px;animation:bxspin 14s linear infinite reverse}
+@keyframes bxspin{to{transform:rotate(360deg)}}
+@keyframes bxpulse{50%{transform:scale(1.18);opacity:.75}}
+.bo-box.shake .bx-ring{animation-duration:.7s}.bo-box.shake .bx-core{animation-duration:.35s}
+@media (prefers-reduced-motion:reduce){.bxsvg *{animation:none!important}}
 @keyframes bob{50%{transform:translateY(-6px) rotate(-3deg)}}
 .odds{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:12px;margin:0}
 .odds dt{color:var(--rc)}.odds dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;color:var(--dim)}
@@ -131,7 +159,7 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 #box-open[hidden]{display:none}
 .bo-stage{display:flex;flex-direction:column;align-items:center;gap:22px;width:min(100%,360px);text-align:center}
 .bo-box{width:150px;height:150px;color:var(--gc,#3ef2ff);filter:drop-shadow(0 0 22px var(--gc,#3ef2ff));transition:color .25s,filter .25s}
-.bo-box svg{width:100%;height:100%}
+.bo-box svg{width:100%;height:100%;overflow:visible}
 .bo-box.shake{animation:bshake .12s infinite}
 @keyframes bshake{25%{transform:translate(-4px,2px) rotate(-4deg)}75%{transform:translate(4px,-2px) rotate(4deg)}}
 .bo-box.pop{animation:bpop .35s forwards}
@@ -322,20 +350,20 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 <div class="screen" id="scr-menu">
   <div class="box menu">
     <div class="menu-main">
-      <h1 class="logo"><span class="l1">NÉON</span><span class="l2">HORDE</span></h1>
-      <p class="tagline">Tiens jusqu’à la dernière vague. Ouvre des box, collectionne les armes rares et fais évoluer ton arsenal.</p>
+      <h1 class="logo"><span class="l1">ANTI</span><span class="l2">KOR</span></h1>
+      <p class="tagline">Le corps est envahi. Tu es sa dernière défense : tiens jusqu’à la dernière vague, ouvre des box et fais muter ton arsenal.</p>
       <div class="group"><div class="eyebrow">Joueurs</div><div class="seg two" id="players-seg"></div></div>
       <div class="panel cut duo" id="duo-panel" hidden></div>
       <div class="group"><div class="eyebrow">Mode</div><div class="seg" id="mode-seg"></div></div>
-      <div class="group"><div class="eyebrow">Arme équipée</div><div class="equip"><div id="equip-card"></div><button class="btn btn-gold cut inv-big" id="btn-inv">Inventaire</button></div></div>
+      <div class="group"><div class="eyebrow">Arme équipée</div><div class="equip"><div id="equip-card"></div><button class="btn cut inv-btn" id="btn-inv"></button></div></div>
+      <button class="lab-cta cut" id="btn-lab"></button>
       <div class="play-row"><button class="btn btn-primary cut" id="btn-play">JOUER</button><kbd>Entrée</kbd></div>
     </div>
     <div class="side">
       <div class="panel cut">
         <div class="eyebrow">Noyaux</div>
         <div class="cores-big" id="menu-cores"></div>
-        <p class="help" style="margin:6px 0 12px">Gagnés à chaque partie. Ils achètent des box d’armes et des talents permanents.</p>
-        <button class="btn cut" id="btn-lab" style="width:100%">Ouvrir le labo</button>
+        <p class="help" style="margin:6px 0 0">Gagnés à chaque partie. Dépense-les au labo : box d’armes et talents permanents.</p>
       </div>
       <div class="panel cut">
         <div class="eyebrow" style="margin-bottom:10px">Records</div>
@@ -454,14 +482,15 @@ function compact(a){let j=0;for(let i=0;i<a.length;i++){const o=a[i];if(!o.dead)
 function segDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1;const l=dx*dx+dy*dy;let t=l?((px-x1)*dx+(py-y1)*dy)/l:0;t=clamp(t,0,1);const cx=x1+dx*t-px,cy=y1+dy*t-py;return Math.sqrt(cx*cx+cy*cy);}
 function fmtTime(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 
-const VERSION='0.6';
+const VERSION='0.7';
 // Mode duo suspendu : le code réseau reste en place mais n'est plus maintenu ni accessible
 const DUO_ENABLED=false;
 /* ================= SAVE ================= */
-const SAVE_KEY='neon-horde-v1';
+const SAVE_KEY='antikor-v1';
+const OLD_SAVE_KEY='neon-horde-v1'; // nom du jeu avant la v0.7 : la progression est reprise
 // inv = armes possédées {u: identifiant unique, id: type d'arme, r: rareté 0-4} ; equip = u de l'arme de départ ; boxes = box non ouvertes
 function defaultSave(){return{cores:0,talents:{},inv:[{u:1,id:'blaster',r:0}],equip:1,uid:2,boxes:{std:1,prem:0},best:{},mode:'sprint',players:'solo',muted:false,runs:0,wins:0,totalKills:0};}
-let save=(()=>{try{const s=JSON.parse(localStorage.getItem(SAVE_KEY));if(s&&typeof s==='object'){const o=Object.assign(defaultSave(),s);
+let save=(()=>{try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||localStorage.getItem(OLD_SAVE_KEY));if(s&&typeof s==='object'){const o=Object.assign(defaultSave(),s);
  // sauvegarde d'avant la v0.4 : chaque arme débloquée devient un exemplaire commun
  if(!Array.isArray(s.inv)&&Array.isArray(s.unlocked)){o.inv=s.unlocked.map((id,k)=>({u:k+1,id,r:0}));o.uid=o.inv.length+1;o.equip=(o.inv.find(x=>x.id===s.start)||o.inv[0]||{}).u;}
  delete o.unlocked;delete o.start;return o;}}catch(e){}return defaultSave();})();
@@ -551,8 +580,20 @@ const ICON={
  arsenal:'<rect x="3" y="4" width="8" height="7" rx="1"/><rect x="13" y="4" width="8" height="7" rx="1"/><rect x="3" y="13" width="8" height="7" rx="1"/><path d="M17 14v5M14.5 16.5h5"/>',
  cards:'<rect x="3" y="6" width="10" height="14" rx="1" transform="rotate(-10 8 13)"/><rect x="10" y="4" width="10" height="14" rx="1" transform="rotate(8 15 11)"/>',
  revive:'<path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/><path d="M12 8v7M8.5 11.5h7"/>',
- box:'<path d="M12 2.5l8.5 4.5v10L12 21.5 3.5 17V7z"/><path d="M3.5 7L12 11.5 20.5 7M12 11.5v10"/><path d="M7.8 4.8l8.5 4.5"/>',
+ box:'<path d="M12 2l8.6 5v10L12 22l-8.6-5V7z"/><path d="M12 6l5.2 3v6L12 18l-5.2-3V9z" opacity=".55"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M3.4 7l3.4 2M20.6 7l-3.4 2M3.4 17l3.4-2M20.6 17l-3.4-2"/>',
 };
+// Illustration détaillée d'une box (capsule bio hexagonale) : couleur = currentColor, animée en CSS
+let BXID=0;
+function boxArt(){const id='bx'+(++BXID);return `<svg viewBox="0 0 100 100" class="bxsvg" aria-hidden="true"><defs>
+<radialGradient id="${id}g"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".3" stop-color="currentColor" stop-opacity=".85"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></radialGradient>
+<linearGradient id="${id}f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".32"/><stop offset=".6" stop-color="#0a0e18" stop-opacity=".92"/><stop offset="1" stop-color="currentColor" stop-opacity=".18"/></linearGradient></defs>
+<polygon points="50,5 89,27.5 89,72.5 50,95 11,72.5 11,27.5" fill="url(#${id}f)" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/>
+<polygon points="50,15 80,32.5 80,67.5 50,85 20,67.5 20,32.5" fill="none" stroke="currentColor" stroke-opacity=".4" stroke-width="1.4"/>
+<path d="M11 27.5l9 5M89 27.5l-9 5M11 72.5l9-5M89 72.5l-9-5M50 5v10M50 95V85" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+<g class="bx-ring"><circle cx="50" cy="50" r="23" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="9 6" stroke-opacity=".85"/></g>
+<circle class="bx-core" cx="50" cy="50" r="21" fill="url(#${id}g)"/>
+<path class="bx-helix" d="M43 38c9 4 9 8 0 12s-9 8 0 12M57 38c-9 4-9 8 0 12s9 8 0 12" fill="none" stroke="#fff" stroke-width="1.6" stroke-opacity=".75" stroke-linecap="round"/>
+<path d="M30 21l6-3.5M64 17.5l6 3.5" stroke="#fff" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/></svg>`;}
 function svg(id,sw=1.8){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[id]||''}</svg>`;}
 
 /* ================= DATA ================= */
@@ -642,8 +683,8 @@ const RARITY=[
 ];
 function rarBonus(r){const R=RARITY[r];const b=[];if(R.dmg>1)b.push(`+${Math.round((R.dmg-1)*100)}% dégâts`);if(R.cd<1)b.push(`-${Math.round((1-R.cd)*100)}% recharge`);if(R.area>1)b.push(`+${Math.round((R.area-1)*100)}% zone`);if(R.proj)b.push(`+${R.proj} projectile`);if(R.lvl>1)b.push(`commence niv ${R.lvl}`);return b.length?b.join(' · '):'Statistiques de base';}
 const BOXES={
- std:{name:'Box néon',cost:25,col:'#3ef2ff',odds:[60,28,9,2.6,.4]},
- prem:{name:'Box prisme',cost:70,col:'#ff3d8b',odds:[0,55,30,12,3]},
+ std:{name:'Box Souche',cost:25,col:'#3ef2ff',odds:[60,28,9,2.6,.4]},
+ prem:{name:'Box Mutante',cost:70,col:'#ff3d8b',odds:[0,55,30,12,3]},
 };
 Object.assign(WEAPONS,{
  flamer:{name:'Lance-flammes',col:'#ff8a2a',evoWith:'fuel',evoName:'Enfer',evoDesc:'Flammes bleues devant et derrière toi, brûlure deux fois plus forte.',
@@ -1365,7 +1406,7 @@ function renderMenu(){
  renderEquip();
  $('#menu-cores').innerHTML=svg('core',2)+`<span class="num">${save.cores}</span>`;
  const rec=m=>{const b=save.best[m];if(!b)return'—';return MODES[m].endless?'vague '+b:(b>=MODES[m].waves?'terminé':'vague '+b);};
- $('#menu-records').innerHTML=`<dt>Sprint</dt><dd>${rec('sprint')}</dd><dt>Marathon</dt><dd>${rec('marathon')}</dd><dt>Infini</dt><dd>${rec('endless')}</dd><dt>Parties · victoires</dt><dd>${save.runs} · ${save.wins}</dd><dt>Zombies éliminés</dt><dd>${(save.totalKills||0).toLocaleString('fr-FR')}</dd>`;
+ $('#menu-records').innerHTML=`<dt>Sprint</dt><dd>${rec('sprint')}</dd><dt>Marathon</dt><dd>${rec('marathon')}</dd><dt>Infini</dt><dd>${rec('endless')}</dd><dt>Parties · victoires</dt><dd>${save.runs} · ${save.wins}</dd><dt>Germes éliminés</dt><dd>${(save.totalKills||0).toLocaleString('fr-FR')}</dd>`;
  renderDuo();
  const pb=$('#btn-play');
  if(!duo){pb.disabled=false;pb.textContent='JOUER';}
@@ -1401,7 +1442,11 @@ function stacks(){const m=new Map();for(const it of save.inv){const k=it.id+'|'+
  return[...m.values()].sort((a,b)=>b.r-a.r||Object.keys(WEAPONS).indexOf(a.id)-Object.keys(WEAPONS).indexOf(b.id));}
 function renderEquip(){const it=equipped();const d=WEAPONS[it.id],R=RARITY[it.r];const nb=save.boxes.std+save.boxes.prem;
  $('#equip-card').innerHTML=`<div class="equip-card cut" style="--c:${d.col};--rc:${R.col}"><span class="ico">${svg(it.id)}</span><div style="min-width:0"><b>${d.name}</b><span class="rar" style="--rc:${R.col}">${R.name}</span><small>${rarBonus(it.r)} · ${Object.keys(ownedMap()).length}/${Object.keys(WEAPONS).length} armes</small></div></div>`;
- $('#btn-lab').innerHTML='Ouvrir le labo'+(nb?` <span class="badge">${nb} box</span>`:'');}
+ const owned=Object.keys(ownedMap()).length,all=Object.keys(WEAPONS).length;
+ $('#btn-inv').innerHTML=`${svg('arsenal')}<span>Inventaire</span><small>${owned}/${all} armes</small>`;
+ const L=$('#btn-lab');L.classList.toggle('hot',nb>0);
+ L.innerHTML=`<span class="box-art">${boxArt()}</span><span class="lab-cta-txt"><b>LABO</b><small>${nb?'Des box t’attendent ! Ouvre-les pour de nouvelles armes.':'Box d’armes · talents permanents'}</small></span>
+  <span class="lab-cta-side"><span class="lab-cta-cores">${svg('core',2)}${save.cores}</span>${nb?`<span class="badge">${nb} box à ouvrir</span>`:'<span class="arrow">→</span>'}</span>`;}
 function renderInv(){const eq=equipped();
  $('#inv-grid').innerHTML=stacks().map(st=>{const d=WEAPONS[st.id],R=RARITY[st.r];const on=st.items.some(x=>x.u===eq.u);const n=st.items.length;
   return `<div class="card cut inv-card ${on?'on':''}" style="--c:${d.col};--rc:${R.col}" data-eq="${st.id}|${st.r}" role="button" tabindex="0">
@@ -1418,7 +1463,7 @@ function fuse(key){const[id,r0]=key.split('|');const r=+r0;const its=save.inv.fi
  renderInv();showReveal(nu,false,'FUSION !');}
 function renderBox(){
  $('#box-list').innerHTML=Object.entries(BOXES).map(([k,B])=>{const n=save.boxes[k];const tot=B.odds.reduce((a,b)=>a+b,0);
-  return `<div class="card cut box-card" style="--c:${B.col}"><div class="card-top"><span class="tag">${n?n+' EN STOCK':'BOX'}</span></div><div class="box-art">${svg('box',1.4)}</div><div class="card-name">${B.name}</div>
+  return `<div class="card cut box-card" style="--c:${B.col}"><div class="card-top"><span class="tag">${n?n+' EN STOCK':'BOX'}</span></div><div class="box-art">${boxArt()}</div><div class="card-name">${B.name}</div>
    <dl class="odds">${B.odds.map((o,r)=>o?`<dt style="--rc:${RARITY[r].col}">${RARITY[r].name}</dt><dd>${(o/tot*100).toFixed(o/tot<.01?1:0)}%</dd>`:'').join('')}</dl>
    <div class="inv-actions">${n?`<button class="btn btn-gold cut" data-open="${k}">Ouvrir (${n})</button>`:''}<button class="btn cut" data-buy="${k}" ${save.cores<B.cost?'disabled':''}>Acheter · ${svg('core',2)}${B.cost}</button></div></div>`;}).join('');}
 function rollBox(k){const B=BOXES[k];let x=Math.random()*B.odds.reduce((a,b)=>a+b,0),r=0;for(;r<4;r++){x-=B.odds[r];if(x<0)break;}return{id:pick(Object.keys(WEAPONS)),r};}
@@ -1428,7 +1473,7 @@ function openBox(k,buy){if(buy){if(save.cores<BOXES[k].cost){Sfx.deny();return;}
  const res=rollBox(k);const isNew=ownedMap()[res.id]===undefined;const it={u:save.uid++,id:res.id,r:res.r};save.inv.push(it);persist();
  for(const t of boTO)clearTimeout(t);boTO=[];
  const ov=$('#box-open');ov.hidden=false;ov.dataset.k=k;
- $('#bo-stage').innerHTML=`<div class="bo-box shake" id="bo-box" style="--gc:${BOXES[k].col}">${svg('box',1.2)}</div><div class="bo-hint">Ouverture…</div>`;
+ $('#bo-stage').innerHTML=`<div class="bo-box shake" id="bo-box" style="--gc:${BOXES[k].col}">${boxArt()}</div><div class="bo-hint">Ouverture…</div>`;
  Sfx.init();SfxRaw.unbox();const box=$('#bo-box');
  const steps=[];for(let r=0;r<=res.r;r++)steps.push(r);const dt=Math.max(260,1100/steps.length);
  steps.forEach((r,i)=>boTO.push(setTimeout(()=>{box.style.setProperty('--gc',RARITY[r].col);SfxRaw.click();},300+i*dt)));
@@ -1459,7 +1504,7 @@ $('#duo-panel').addEventListener('click',e=>{const b=e.target.closest('[data-net
   case'leave':netLog('Partie quittée');netReset();renderMenu();break;
   case'copylog':{const t=NETLOG.join('\n');if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>{b.textContent='Journal copié ✓';},()=>{b.textContent='Copie impossible : sélectionne le texte';});break;}
   case'share':{const url=location.origin+location.pathname+'?join='+NET.code;
-   if(navigator.share)navigator.share({title:'Néon Horde',text:'Rejoins ma partie de Néon Horde (code '+NET.code+')',url}).catch(()=>{});
+   if(navigator.share)navigator.share({title:'Antikor',text:'Rejoins ma partie d’Antikor (code '+NET.code+')',url}).catch(()=>{});
    else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>{b.textContent='Lien copié ✓';},()=>{b.textContent=url;});
    break;}}});
 $('#duo-panel').addEventListener('keydown',e=>{if(e.target.id==='code-in'&&e.key==='Enter'){e.preventDefault();$('[data-net="join"]').click();}});
@@ -1627,8 +1672,9 @@ function drawPickup(k){const bob=Math.sin(k.t*5)*2;
  else if(k.type==='magnet'){drawGlow('#3ea8ff',k.x,k.y+bob,50,.7);ctx.globalCompositeOperation='source-over';ctx.save();ctx.translate(k.x-9,k.y+bob-9);ctx.scale(.75,.75);ctx.strokeStyle='#3ea8ff';ctx.lineWidth=2.6;ctx.stroke(new Path2D('M5.5 3.5V12a6.5 6.5 0 0 0 13 0V3.5h-4.3V12a2.2 2.2 0 0 1-4.4 0V3.5z'));ctx.restore();ctx.globalCompositeOperation='lighter';}
  else if(k.type==='bomb'){drawGlow('#ffffff',k.x,k.y+bob,50,.6+.3*Math.sin(k.t*8));ctx.globalCompositeOperation='source-over';ctx.fillStyle='#0a0e18';ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(k.x,k.y+bob,8,0,TAU);ctx.fill();ctx.stroke();ctx.fillStyle='#ff4a3d';ctx.beginPath();ctx.arc(k.x,k.y+bob,3,0,TAU);ctx.fill();ctx.globalCompositeOperation='lighter';}
  else if(k.type==='box'){const y=k.y+bob;const c=k.v===2?BOXES.prem.col:BOXES.std.col;ctx.globalAlpha=.3+.15*Math.sin(k.t*5);ctx.fillStyle=c;ctx.fillRect(k.x-5,y-140,10,140);ctx.globalAlpha=1;drawGlow(c,k.x,y,100,.9);ctx.globalCompositeOperation='source-over';
-  ctx.save();ctx.translate(k.x,y);ctx.rotate(Math.sin(k.t*3)*.15);ctx.fillStyle='#0b0f1e';ctx.strokeStyle=c;ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(13,-7);ctx.lineTo(13,8);ctx.lineTo(0,15);ctx.lineTo(-13,8);ctx.lineTo(-13,-7);ctx.closePath();ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.moveTo(-13,-7);ctx.lineTo(0,0);ctx.lineTo(13,-7);ctx.moveTo(0,0);ctx.lineTo(0,15);ctx.stroke();ctx.restore();ctx.globalCompositeOperation='lighter';}
+  ctx.save();ctx.translate(k.x,y);ctx.rotate(Math.sin(k.t*2)*.12);ctx.lineJoin='round';ctx.fillStyle='#0b0f1e';ctx.strokeStyle=c;ctx.lineWidth=2.4;ctx.beginPath();for(let i=0;i<6;i++){const a=i/6*TAU-Math.PI/2;i?ctx.lineTo(Math.cos(a)*15,Math.sin(a)*15):ctx.moveTo(Math.cos(a)*15,Math.sin(a)*15);}ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.globalAlpha=.5;ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<6;i++){const a=i/6*TAU-Math.PI/2;i?ctx.lineTo(Math.cos(a)*9.5,Math.sin(a)*9.5):ctx.moveTo(Math.cos(a)*9.5,Math.sin(a)*9.5);}ctx.closePath();ctx.stroke();ctx.globalAlpha=1;
+  ctx.restore();ctx.globalCompositeOperation='lighter';drawGlow(c,k.x,y,26+4*Math.sin(k.t*8),1);drawGlow('#ffffff',k.x,y,10,.9);}
  else if(k.type==='chest'){const y=k.y+bob;ctx.globalAlpha=.25+.15*Math.sin(k.t*4);ctx.fillStyle='#ffd23e';ctx.fillRect(k.x-6,y-120,12,120);ctx.globalAlpha=1;drawGlow('#ffd23e',k.x,y,90,.8);ctx.globalCompositeOperation='source-over';
   ctx.fillStyle='#2a1d05';ctx.strokeStyle='#ffd23e';ctx.lineWidth=2;ctx.fillRect(k.x-13,y-9,26,18);ctx.strokeRect(k.x-13,y-9,26,18);ctx.beginPath();ctx.moveTo(k.x-13,y-2);ctx.lineTo(k.x+13,y-2);ctx.stroke();ctx.fillStyle='#ffd23e';ctx.fillRect(k.x-3,y-4,6,6);ctx.globalCompositeOperation='lighter';}}
 
@@ -1671,7 +1717,7 @@ function drawMateArrow(){const m=G.players[1-ME];if(!m||G.state==='over')return;
 // L'hôte fait tourner la partie et envoie un instantané ~20 fois/s ; l'invité affiche cet état,
 // déplace lui-même son vaisseau (pas de latence ressentie) et transmet ses actions à l'hôte.
 const NET={role:null,peer:null,conn:null,code:'',status:'',err:'',typed:'',peerInfo:null,hostMode:null,joinTO:0};
-const PEER_PREFIX='neonhorde-v1-';
+const PEER_PREFIX='antikor-v1-';
 const PEERJS_URL='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
 // Serveurs ICE : STUN pour trouver l'adresse publique, TURN (relais) quand la connexion directe est impossible (4G, réseaux d'entreprise…)
 const ICE=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:'stun:stun.cloudflare.com:3478'},
@@ -1886,7 +1932,7 @@ resize();initFloor();initDemo();
 $('#ver').textContent='v'+VERSION;
 renderMenu();show('scr-menu');
 requestAnimationFrame(frame);
-window.__NH={get G(){return G;},get P(){return P;},get NET(){return NET;},startGame,act,chooseLevel};
+window.__AK={get G(){return G;},get P(){return P;},get NET(){return NET;},startGame,act,chooseLevel};
 })();
 </script>
 </body>
