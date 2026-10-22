@@ -1,0 +1,9 @@
+{
+  "name": "antikor",
+  "private": true,
+  "type": "module",
+  "description": "Antikor : le jeu est servi tel quel par GitHub Pages, sans étape de construction. Ce fichier sert seulement à Node (tests de la simulation).",
+  "scripts": {
+    "bench": "node tests/sim-bench.mjs"
+  }
+}

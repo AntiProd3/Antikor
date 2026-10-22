@@ -1,0 +1,26 @@
+// Raretés des armes et box.
+
+// Bonus appliqués à l'arme pendant toute la partie (dégâts, recharge, zone, projectiles, niveau de départ)
+export const RARITY = [
+  { name: 'Commun', col: '#a9b6cc', dmg: 1, cd: 1, area: 1, proj: 0, lvl: 1 },
+  { name: 'Rare', col: '#3ea8ff', dmg: 1.15, cd: 0.95, area: 1.04, proj: 0, lvl: 1 },
+  { name: 'Épique', col: '#b46bff', dmg: 1.32, cd: 0.9, area: 1.08, proj: 0, lvl: 1 },
+  { name: 'Légendaire', col: '#ffd23e', dmg: 1.55, cd: 0.85, area: 1.12, proj: 0, lvl: 2 },
+  { name: 'Mythique', col: '#ff3d8b', dmg: 1.85, cd: 0.8, area: 1.16, proj: 1, lvl: 2 },
+];
+
+export function rarBonus(r) {
+  const R = RARITY[r];
+  const b = [];
+  if (R.dmg > 1) b.push(`+${Math.round((R.dmg - 1) * 100)}% dégâts`);
+  if (R.cd < 1) b.push(`-${Math.round((1 - R.cd) * 100)}% recharge`);
+  if (R.area > 1) b.push(`+${Math.round((R.area - 1) * 100)}% zone`);
+  if (R.proj) b.push(`+${R.proj} projectile`);
+  if (R.lvl > 1) b.push(`commence niv ${R.lvl}`);
+  return b.length ? b.join(' · ') : 'Statistiques de base';
+}
+
+export const BOXES = {
+  std: { name: 'Box Souche', cost: 25, col: '#3ef2ff', odds: [60, 28, 9, 2.6, 0.4] },
+  prem: { name: 'Box Mutante', cost: 70, col: '#ff3d8b', odds: [0, 55, 30, 12, 3] },
+};

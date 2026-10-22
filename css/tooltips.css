@@ -1,0 +1,89 @@
+/* ---------- Infobulles ---------- */
+#tip {
+  position: fixed;
+  z-index: 60;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 24px));
+  padding: 11px 13px;
+  background: rgba(6, 9, 20, 0.97);
+  border: 1px solid var(--tc, var(--cyan));
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    0 0 18px color-mix(in srgb, var(--tc, var(--cyan)) 30%, transparent);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--fg);
+  pointer-events: none;
+}
+#tip[hidden] {
+  display: none;
+}
+#tip .th {
+  font-family: var(--f-display);
+  font-size: 16px;
+  color: var(--tc, var(--cyan));
+  margin-bottom: 4px;
+}
+#tip .ts {
+  color: var(--dim);
+  margin: 0 0 6px;
+}
+#tip dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 14px;
+  margin: 6px 0;
+}
+#tip dt {
+  color: var(--dim);
+}
+#tip dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+#tip ul {
+  margin: 4px 0;
+  padding-left: 16px;
+}
+#tip li {
+  margin: 1px 0;
+}
+#tip .tn {
+  margin: 6px 0 0;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+  color: var(--dim);
+}
+#tip .tg {
+  color: var(--gold);
+}
+#tip .tc {
+  color: var(--core);
+}
+.tipi {
+  display: none;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  place-items: center;
+  border: 1px solid var(--line);
+  color: var(--dim);
+  font: 700 13px/1 var(--f-ui);
+  background: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+@media (hover: none) {
+  .tipi {
+    display: grid;
+  }
+}
+.box-card .tipi {
+  display: grid;
+}
+.tipi:hover {
+  color: var(--fg);
+  border-color: var(--fg);
+}

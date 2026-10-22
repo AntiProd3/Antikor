@@ -1,0 +1,281 @@
+/* ---------- Carte de la carrière ---------- */
+#scr-map {
+  padding-top: 0;
+}
+#scr-map {
+  overflow-x: hidden;
+}
+.map-box {
+  width: min(100%, 720px);
+  gap: 0;
+}
+.map-head::before {
+  content: '';
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background: linear-gradient(var(--ink) 75%, transparent);
+}
+.map-head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: max(16px, env(safe-area-inset-top, 0px)) 0 14px;
+}
+.map-stars {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--f-display);
+  font-size: 22px;
+  color: var(--gold);
+}
+.map-stars svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+.map-inner {
+  position: relative;
+  width: 100%;
+}
+.map-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+/* la couleur du monde s'étend sur toute la largeur de l'écran */
+.map-band::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 50vw);
+  width: 100vw;
+  z-index: -1;
+  border-top: 1px solid color-mix(in srgb, var(--c) 25%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--c) 10%, transparent),
+    transparent 40%,
+    color-mix(in srgb, var(--c) 6%, transparent)
+  );
+}
+.map-band b {
+  position: absolute;
+  left: 24px;
+  bottom: 30px;
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: var(--c);
+  text-shadow: 0 0 12px var(--c);
+}
+.map-band small {
+  position: absolute;
+  left: 24px;
+  bottom: 12px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.map-band.r b,
+.map-band.r small {
+  left: auto;
+  right: 24px;
+  text-align: right;
+}
+.map-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+.lv {
+  --c: var(--cyan);
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  border: 2px solid var(--c);
+  background: radial-gradient(circle at 40% 35%, color-mix(in srgb, var(--c) 40%, #0a1122), #070b16 75%);
+  color: #fff;
+  font-family: var(--f-display);
+  font-size: 24px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--c) 45%, transparent);
+  transition: transform 0.12s;
+}
+.lv:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+.lv.big {
+  width: 84px;
+  height: 84px;
+  font-size: 30px;
+}
+.lv.locked {
+  --c: #2b3a5c;
+  color: #4a5a7c;
+  cursor: pointer;
+  box-shadow: none;
+  background: #0a0f1c;
+}
+.lv.locked svg {
+  width: 22px;
+  height: 22px;
+}
+.lv.cur::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 2px solid var(--c);
+  animation: lvp 1.6s ease-out infinite;
+}
+@keyframes lvp {
+  from {
+    transform: scale(0.85);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+.lv .st {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1px;
+}
+.lv .st svg {
+  width: 15px;
+  height: 15px;
+  fill: #2b3a5c;
+  stroke: none;
+}
+.lv .st svg.on {
+  fill: var(--gold);
+  filter: drop-shadow(0 0 4px rgba(255, 210, 62, 0.8));
+}
+.lv .crown {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--c);
+  font-family: var(--f-ui);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.lv.shake {
+  animation: lvshake 0.3s;
+}
+@keyframes lvshake {
+  25% {
+    transform: translate(-56%, -50%);
+  }
+  75% {
+    transform: translate(-44%, -50%);
+  }
+}
+.map-pop {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: grid;
+  place-items: end center;
+  background: rgba(2, 3, 8, 0.55);
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+}
+.map-pop[hidden] {
+  display: none;
+}
+.map-card {
+  --c: var(--cyan);
+  width: min(100%, 460px);
+  padding: 20px;
+  background: linear-gradient(170deg, color-mix(in srgb, var(--c) 16%, #0a1122), #080d1a 70%);
+  border: 2px solid var(--c);
+  box-shadow: 0 0 40px color-mix(in srgb, var(--c) 35%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: cardIn 0.25s;
+}
+.map-card h3 {
+  margin: 0;
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1;
+}
+.map-card .stars-row svg {
+  width: 26px;
+  height: 26px;
+  fill: #2b3a5c;
+}
+.map-card .stars-row svg.on {
+  fill: var(--gold);
+  filter: drop-shadow(0 0 6px rgba(255, 210, 62, 0.8));
+}
+.diff {
+  display: flex;
+  gap: 3px;
+}
+.diff i {
+  width: 18px;
+  height: 6px;
+  background: #1a2745;
+}
+.diff i.on {
+  background: var(--c);
+  box-shadow: 0 0 6px var(--c);
+}
+.over-stars {
+  display: flex;
+  gap: 10px;
+}
+.over-stars svg {
+  width: 52px;
+  height: 52px;
+  fill: #1f2a44;
+  stroke: none;
+}
+.over-stars svg.on {
+  fill: var(--gold);
+  filter: drop-shadow(0 0 12px rgba(255, 210, 62, 0.9));
+  animation: starIn 0.5s backwards;
+}
+.over-stars svg.on:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.over-stars svg.on:nth-child(3) {
+  animation-delay: 0.5s;
+}
+@keyframes starIn {
+  from {
+    transform: scale(0) rotate(-90deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.3);
+  }
+}

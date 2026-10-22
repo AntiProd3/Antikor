@@ -1,0 +1,385 @@
+/* ---------- Cards ---------- */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.card {
+  --c: var(--cyan);
+  position: relative;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 16px;
+  cursor: pointer;
+  background: linear-gradient(170deg, color-mix(in srgb, var(--c) 16%, #0a1122), #080d1a 65%);
+  border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
+  transition:
+    transform 0.14s,
+    box-shadow 0.14s;
+  animation: cardIn 0.32s backwards;
+}
+.card:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.card:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.card:nth-child(4) {
+  animation-delay: 0.18s;
+}
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.96);
+  }
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 0 0 1px var(--c),
+    0 12px 34px color-mix(in srgb, var(--c) 32%, transparent);
+}
+.cards.wait .card {
+  pointer-events: none;
+}
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ico {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  color: var(--c);
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  background: rgba(0, 0, 0, 0.35);
+}
+.ico svg {
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 0 6px var(--c));
+}
+.tag {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  padding: 4px 7px;
+  background: var(--c);
+  color: #050811;
+}
+.card-name {
+  font-family: var(--f-display);
+  font-size: 20px;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+}
+.card-desc {
+  color: var(--dim);
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 0;
+}
+.card-hint {
+  font-size: 12px;
+  color: var(--gold);
+  line-height: 1.35;
+  margin: 0;
+}
+.pips {
+  display: flex;
+  gap: 4px;
+}
+.pip {
+  width: 16px;
+  height: 5px;
+  background: #1a2745;
+}
+.pip.on {
+  background: var(--c);
+  box-shadow: 0 0 6px var(--c);
+}
+.pip.nw {
+  background: var(--c);
+  animation: pip 0.5s infinite alternate;
+}
+@keyframes pip {
+  to {
+    opacity: 0.25;
+  }
+}
+.card kbd {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
+.card.evo {
+  border-color: var(--gold);
+  background: linear-gradient(170deg, rgba(255, 210, 62, 0.22), #0d0c12 70%);
+}
+.card.evo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 235, 160, 0.22) 45%, transparent 60%);
+  background-size: 260% 100%;
+  animation: shine 1.8s infinite;
+  pointer-events: none;
+}
+@keyframes shine {
+  from {
+    background-position: 130% 0;
+  }
+  to {
+    background-position: -130% 0;
+  }
+}
+.lv-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.lv-head .h2 {
+  color: var(--green);
+  text-shadow: 0 0 22px rgba(98, 255, 154, 0.45);
+}
+
+/* ---------- Shop ---------- */
+.shop-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.shop-head .h2 {
+  color: var(--gold);
+  text-shadow: 0 0 22px rgba(255, 210, 62, 0.4);
+}
+.wallet {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--f-display);
+  font-size: 30px;
+  color: var(--gold);
+}
+.wallet svg {
+  width: 26px;
+  height: 26px;
+}
+.price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+.price {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+.price svg {
+  width: 16px;
+  height: 16px;
+}
+.price.poor {
+  color: var(--red);
+}
+.lockbtn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  color: var(--dim);
+}
+.lockbtn svg {
+  width: 18px;
+  height: 18px;
+}
+.lockbtn.on {
+  color: var(--gold);
+  border-color: var(--gold);
+  background: rgba(255, 210, 62, 0.12);
+}
+.card.sold {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.card.sold .price {
+  color: var(--green);
+}
+.card.na {
+  opacity: 0.45;
+}
+.card.shake {
+  animation: shake 0.3s;
+}
+@keyframes shake {
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+.shop-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.shop-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 14px;
+}
+@media (max-width: 820px) {
+  .shop-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.loadrow {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(31, 47, 82, 0.6);
+}
+.loadrow:last-child {
+  border-bottom: none;
+}
+.loadrow .ico {
+  width: 34px;
+  height: 34px;
+}
+.loadrow .ico svg {
+  width: 22px;
+  height: 22px;
+}
+.loadrow b {
+  font-weight: 600;
+  font-size: 14px;
+  display: block;
+}
+.loadrow em {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--dim);
+  display: block;
+  line-height: 1.3;
+}
+.loadrow em.ok {
+  color: var(--gold);
+}
+.sec-title {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--dim);
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.statgrid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px 12px;
+  font-size: 13px;
+  margin: 0;
+}
+.statgrid dt {
+  color: var(--dim);
+}
+.statgrid dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.empty {
+  font-size: 13px;
+  color: var(--dim);
+  margin: 0;
+}
+
+/* ---------- Lab ---------- */
+.lab-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.tal {
+  --c: var(--gold);
+}
+.tal .price {
+  font-size: 15px;
+}
+.tal[aria-disabled] .ico {
+  opacity: 0.75;
+}
+.price.gate {
+  color: var(--dim);
+  font-size: 14px;
+}
+.price.gate svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ---------- Over ---------- */
+.over {
+  max-width: 640px;
+}
+.over .h2 {
+  font-size: clamp(34px, 8vw, 64px);
+}
+.over.win .h2 {
+  color: var(--gold);
+  text-shadow: 0 0 26px rgba(255, 210, 62, 0.5);
+}
+.over.lose .h2 {
+  color: var(--mag);
+  text-shadow: 0 0 26px rgba(255, 61, 139, 0.5);
+}
+.reward {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: var(--f-display);
+  font-size: 30px;
+  color: var(--core);
+}
+.reward svg {
+  width: 30px;
+  height: 30px;
+}
+.btnrow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}

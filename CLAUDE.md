@@ -6,30 +6,35 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
 
 - **Antikor** est un jeu d'arcade de survie (« survivor » / auto-shooter) à thème biologique et néon : le joueur est la dernière défense d'un corps envahi par des germes. Les armes tirent toutes seules, on se déplace, on monte de niveau, on achète entre les vagues.
 - Le jeu s'appelait **« Néon Horde »** jusqu'à la v0.7. Il a été renommé parce qu'un jeu Steam porte ce nom.
-- **Tout le jeu tient dans un seul fichier : `index.html`** (≈ 2 200 lignes, ≈ 225 Ko : HTML, CSS et JS en IIFE, sans dépendance ni build).
+- **Le jeu est découpé en modules ES** depuis la v0.8.2 : `index.html` (le squelette HTML des écrans), `css/` et `js/`. Aucune dépendance, aucune étape de construction : GitHub Pages sert les fichiers tels quels. Avant, tout tenait dans un seul `index.html` de 2 200 lignes.
 - **Langue :** l'interface, les commentaires du code et les échanges avec l'utilisateur sont en **français**. Les messages de commit sont en anglais.
-- **Version actuelle : 0.8.1.** Elle est affichée en bas à droite du jeu (`const VERSION`).
+- **Version actuelle : 0.8.2.** Elle est affichée en bas à droite du jeu (`VERSION` dans `js/config.js`).
 
 ## Dépôt et publication
 
 - Dépôt GitHub : `antoinecorcos/neonhorde`, branche **`main`**, publiée telle quelle par **GitHub Pages** (Settings → Pages → branche `main`, dossier `/`).
 - URL : https://antoinecorcos.github.io/neonhorde/ (le dépôt sera peut-être renommé plus tard ; l'utilisateur a dit « on verra le dépôt plus tard »).
-- Usage établi : **chaque mise à jour validée est commitée et poussée directement sur `main`**, ce qui la met en ligne. On incrémente `VERSION` dans `index.html` et la ligne « Version actuelle » du `README.md`.
+- Usage établi : **chaque mise à jour validée est commitée et poussée directement sur `main`**, ce qui la met en ligne. On incrémente `VERSION` dans `js/config.js` et la ligne « Version actuelle » du `README.md`.
 - Fichiers :
-  - `index.html` : le jeu ;
+  - `index.html`, `css/`, `js/` : le jeu (voir « Repères dans le code ») ;
+  - `tests/sim-bench.mjs` et `package.json` : test de la simulation sous Node (le `package.json` ne sert qu'à Node, pas au site) ;
+  - `.prettierrc.json` / `.prettierignore` : réglages de mise en forme du code ;
   - `README.md` : présentation et règles ;
   - `manifest.webmanifest` : nom « Antikor », icônes ;
   - les icônes : `apple-touch-icon.png` (180), `icon-192.png`, `icon-512.png`, `favicon-32.png`, `favicon-64.png`. Elles représentent le petit monstre vert (« walker ») du jeu sur fond sombre.
-- ⚠️ À vérifier : un commit de l'utilisateur (« icon update ») a changé `href="apple-touch-icon.png"` en `href="/apple-touch-icon.png"`. Sur un site de projet GitHub Pages (`/neonhorde/`), le chemin absolu pointe vers la racine du domaine : l'icône iOS est probablement introuvable. À confirmer avec l'utilisateur avant de corriger.
+- L'icône iOS utilise un chemin relatif (`href="apple-touch-icon.png"`), corrigé en v0.8.2 : un chemin absolu `/…` pointerait vers la racine du domaine et non vers `/neonhorde/`. Même règle pour tout nouveau fichier : **toujours des chemins relatifs**.
+- Cache : GitHub Pages autorise les navigateurs à garder les fichiers 10 minutes. Juste après une mise en ligne, un joueur peut brièvement avoir un mélange d'anciens et de nouveaux modules ; un rechargement quelques minutes plus tard règle le problème.
 
 ## L'utilisateur et sa façon de travailler
+
+- Deux personnes travaillent sur le projet : **Antoine** (propriétaire du dépôt) et **Tibo**, qui gère le Raspberry Pi et la future partie serveur (feuille de route : serveur Node autoritaire sur le Pi, Tailscale Funnel, SQLite ; voir « Pistes en attente »).
 
 - Il n'est pas développeur. Il teste sur PC et sur iPhone (ajout à l'écran d'accueil iOS) et donne des retours de design et de jeu par petites séries numérotées.
 - Il apprécie qu'on propose des idées et qu'on soit créatif, mais il tranche franchement : par exemple « le nouveau fond, ça va pas du tout ».
 - Il aime le style **néon sobre**, le côté **addictif** (box, raretés, étoiles, carte de niveaux) et la **vibe biologique**.
 - Réponses attendues en français, claires, sans jargon. On résume ce qui a changé et ce qui a été testé.
 
-## Fonctionnalités actuelles (v0.8.1)
+## Fonctionnalités actuelles (v0.8.2)
 
 ### Menu
 - Logo **ANTIKOR** sur une ligne : « ANTI » en cyan, « KOR » en rose néon qui clignote. Sa taille suit la colonne (unités `cqi`).
@@ -119,38 +124,53 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
   - `?net=local` permet de tester entre deux onglets (BroadcastChannel), et `?signal=hôte:port` d'utiliser un autre serveur PeerJS.
 - Il a fonctionné en vrai entre deux appareils (v0.3). Les fonctionnalités ajoutées depuis la v0.4 ne sont **pas toutes synchronisées** : carrière, thèmes, tourelle, etc.
 
-## Repères dans le code (`index.html`)
+## Repères dans le code
 
-- **CSS :** variables de couleur dans `:root` (`--cyan`, `--mag`, `--gold`, `--core`…). Les panneaux ont des coins coupés (classe `.cut`), avec les polices Bungee (titres) et Chakra Petch (texte).
+### Organisation des fichiers
+
+Chaque fichier commence par une ligne qui dit ce qu'il contient. Les imports en tête de fichier indiquent d'où vient chaque fonction.
+
+- `index.html` : le HTML de tous les écrans, les feuilles de style, puis `<script type="module" src="js/main.js">`.
+- `css/` : les styles, chargés **dans cet ordre** (l'ordre compte pour la cascade) : `base`, `menu`, `collection` (raretés, inventaire, box, bouton labo), `map`, `tooltips`, `duo`, `screens` (cartes, boutique, labo, fin), `hud` (+ bannière).
+- `js/main.js` : démarrage (`init…()` de chaque module) et boucle `frame()`.
+- `js/data/` : **les réglages du jeu, sans code** ; c'est là qu'on équilibre.
+  - `weapons.js` : les 15 armes (textes, `stats(niveau)`, évolution) ;
+  - `passives.js` (équipements), `talents.js` (labo + textes d'infobulle `TFX`/`TNOTE`), `loot.js` (`RARITY`, `BOXES`), `career.js` (`MODES`, `WORLDS`, `CAREER_LEVELS`, boss par niveau), `enemies.js` (`ETYPES`, `MAX_E`, `BOSSV`).
+- `js/sim/` : **la simulation**. Elle n'accède jamais à la page (ni `document`, ni `window`, ni sauvegarde, ni son) et tourne aussi sous Node.
+  - `state.js` : `G`, `P`, `ME`, `WM`, `view` (demi-taille visible `hw`/`hh`), `settings`. Les autres modules lisent ces variables directement mais les modifient **uniquement avec `setG`, `setP`, `setME`, `setWM`, `setView`** (règle des modules ES) ;
+  - `hooks.js` : ce que la simulation demande à l'interface (son, bannière, notification, écran, fin de partie…). Le client les remplit dans `js/ui/game.js` (`initGame`) ; sous Node elles restent vides ;
+  - `update.js` (une image), `weapons.js` (comportement des armes, `this` = l'arme de `data/weapons.js`), `combat.js`, `enemies.js`, `projectiles.js`, `pickups.js`, `spawn.js` (difficulté `progress()`/`computeScale()`, apparitions, événements), `boss.js`, `waves.js` (`newRun`, `startWave`, `endWave`), `options.js` (cartes de niveau/coffre/boutique et prix), `flow.js` (actions `doAct`, montée de niveau, boutique, pause, `gameOver`), `fx.js` (effets et `sfx()`, enregistrés par `rec()` pour le duo), `grid.js`, `player.js` ;
+  - la commande de chaque joueur arrive dans `pl.in = [x, y]`, remplie par `main.js` (`stepGame`) à partir de `inputVec()`.
+- `js/render/` : le dessin sur le canvas. `render.js` (image complète, démo du menu), `world.js` (tout ce qui est dans le monde), `floor.js` (sols des mondes), `canvas.js` (taille, `ZOOM`, `HW`/`HH`), `sprites.js` (dessins des monstres, créés par `initSprites()`).
+- `js/ui/` : les écrans HTML. `game.js` (lancer/quitter une partie, `act()`, branchement des hooks), `menu.js`, `map.js`, `lab.js`, `boxes.js`, `inventory.js`, `cards.js` (écrans de niveau et de boutique), `over.js` (fin de partie, étoiles, noyaux), `hud.js`, `tooltips.js`, `keyboard.js`, `duo.js`, `dom.js` (`$`, `show`, notifications).
+- `js/net/` : le duo suspendu (`net.js` connexion PeerJS, `sync.js` instantanés et affichage chez l'invité).
+- `js/save.js` (sauvegarde), `js/meta.js` (talents achetés, armes possédées, `mySpec()`), `js/audio.js` (sons), `js/input.js` (clavier, joystick), `js/icons.js` (icônes SVG), `js/util.js`, `js/config.js` (`VERSION`, `DUO_ENABLED`).
+- Les deux fichiers de dessins (`js/icons.js`, `js/render/sprites.js`) restent volontairement compacts ; inutile de les lire pour comprendre le jeu.
+
+### Points clés
+
 - **Écrans** (`.screen`, affichés avec `show(id)`) : `scr-menu`, `scr-lab`, `scr-inv`, `scr-map`, `scr-level`, `scr-shop`, `scr-pause`, `scr-over`. Plus le calque `#box-open` et `#map-pop`.
-- **Constantes principales :**
-  - `VERSION`, `DUO_ENABLED` ;
-  - `SAVE_KEY='antikor-v1'` (l'ancienne `neon-horde-v1` est reprise automatiquement) ;
-  - `WEAPONS`, `PASSIVES`, `TALENTS`, `RARITY`, `BOXES`, `MODES`, `WORLDS`, `CAREER_LEVELS`, `BOSSV`, `ETYPES`, `ICON` (icônes SVG).
-- **État :**
-  - `G` : la partie ;
-  - `P` : le joueur « courant », utilisé par le code des armes, avec `withP()` ;
-  - `ME` : l'index du joueur local ;
-  - `G.players` : la liste des joueurs ;
-  - `WM` : le multiplicateur de dégâts de la rareté pendant la mise à jour d'une arme.
-- **Sauvegarde** (`save`, `persist()`) : `cores`, `talents`, `inv` (`[{u,id,r}]`), `equip`, `uid`, `boxes {std,prem}`, `career {max,stars}`, `best`, `mode`, `players`, `muted`, `runs`, `wins`, `totalKills`. Une fonction de nettoyage s'exécute au chargement et migre les anciennes sauvegardes.
-- **Boucle :** `frame()` → `update()` (simulation) → `render()` (canvas 2D) → `updateHUD()`. Le sol est dessiné par `floorPat` / `bossPat` (motif du monde 1) ou par `drawProcFloor()` (mondes 2 à 5, dessinés directement à l'écran).
-- **Effets :** `burst`, `spark`, `ring`, `addText`, `banner`, `toast`… Ces fonctions appellent `rec()`, qui sert au duo.
-- **Débogage :** `window.__AK` expose `G`, `P`, `NET`, `startGame`, `act`, `chooseLevel`.
+- **CSS :** variables de couleur dans `:root` (`css/base.css` : `--cyan`, `--mag`, `--gold`, `--core`…). Coins coupés avec la classe `.cut`, polices Bungee (titres) et Chakra Petch (texte).
+- **État :** `G` la partie, `G.players` les joueurs, `P` le joueur « courant » (utilisé par le code des armes, changé avec `withP()`), `ME` l'index du joueur local, `WM` le multiplicateur de dégâts de la rareté pendant la mise à jour d'une arme.
+- **Sauvegarde** (`save`, `persist()`, clé `antikor-v1`, l'ancienne `neon-horde-v1` est reprise) : `cores`, `talents`, `inv` (`[{u,id,r}]`), `equip`, `uid`, `boxes {std,prem}`, `career {max,stars}`, `best`, `mode`, `players`, `muted`, `runs`, `wins`, `totalKills`. Un nettoyage s'exécute au chargement de `save.js`.
+- **Boucle :** `frame()` → `stepGame()` → `update()` (simulation) → `render()` → `updateHUD()`.
+- **Pour le futur serveur** (phase 0 du bilan serveur, faite en v0.8.2) : la simulation n'a plus de lien avec la page, les sprites sont créés dans `initSprites()`, la sauvegarde est sortie de `newRun`, et `tests/sim-bench.mjs` fait tourner une partie sous Node. Reste à faire côté serveur : fixer `view` avec `setView()` (aujourd'hui la taille de l'écran du joueur), et transformer en identifiants les quelques références directes entre objets (cible des roquettes `b.tg`, cibles du cryo `w.tgs`, `G.boss`).
+- **Débogage :** `window.__AK` expose `G`, `P`, `NET`, `startGame`, `act`, `chooseLevel`, `keys` et `tick(dt)` (une étape de simulation, pour les tests).
 
 ## Méthode de travail
 
-- Les modifications se font avec de petits scripts Python de remplacement, chacun vérifiant que le texte à remplacer apparaît exactement une fois, puis avec un contrôle de syntaxe :
-  `sed -n '/<script>/,/<\/script>/p' index.html | sed '1d;$d' > /tmp/x.js && node --check /tmp/x.js`
-- **Tests dans un vrai navigateur avec Playwright** (Chromium déjà installé) :
-  - lancer un serveur local : `python3 -m http.server 8765 --bind 127.0.0.1` dans le dossier du dépôt ;
-  - piloter la partie via `__AK` (forcer l'XP, `G.waveT=G.waveDur` pour finir une vague, PV infinis…) ;
-  - prendre des captures et les regarder ; vérifier qu'il n'y a pas d'erreur console ;
-  - tester l'absence de défilement du menu sur plusieurs tailles et le rendu mobile (390×844).
+- Le jeu se teste avec un serveur local (les modules ne s'ouvrent pas en double-cliquant sur `index.html`) : `python3 -m http.server 8765 --bind 127.0.0.1` dans le dossier du dépôt, puis http://127.0.0.1:8765/.
+- **Mise en forme :** une instruction par ligne, réglages Prettier dans `.prettierrc.json` (`npx prettier --write js css tests`). Les fichiers de dessins sont exclus (`.prettierignore`).
+- **Contrôles avant de pousser :**
+  - `node --check` sur les fichiers modifiés, et vérifier qu'aucun module de `js/sim/` n'importe depuis `ui/`, `render/`, `net/`, `save.js`, `audio.js` ou `input.js` ;
+  - `node tests/sim-bench.mjs [ticks] [mode] [niveau] [--duo] [--mortel]` : une partie sous Node, avec le temps par tick ;
+  - **tests dans un vrai navigateur avec Playwright** (Chromium déjà installé) : piloter la partie via `__AK` (forcer l'XP, `G.waveT=G.waveDur` pour finir une vague, PV infinis…), prendre des captures et les regarder, vérifier qu'il n'y a pas d'erreur console, l'absence de défilement du menu (1280×720 à 1920×1080) et le rendu mobile (390×844).
+- **Pour un changement qui ne doit rien changer au jeu** (réorganisation) : remplacer `Math.random` par un générateur à graine et `performance.now` par une horloge simulée, appeler `__AK.tick(1/60)` en boucle avec des touches scriptées, et comparer la trace (vague, éliminations, positions, PV, XP…) avec celle de la version précédente. Elle doit être identique. C'est ainsi qu'a été vérifié le découpage de la v0.8.2.
 - Pièges déjà rencontrés :
   - les identifiants HTML en double (par exemple `btn-next` existe déjà dans la boutique) ;
-  - Playwright refuse de cliquer sur un élément `aria-disabled` : utiliser `{force:true}`.
-- L'environnement de développement n'a pas accès à unpkg ni à 0.peerjs.com. On a donc testé le duo avec un serveur PeerJS local (paquet npm `peer`).
+  - Playwright refuse de cliquer sur un élément `aria-disabled` : utiliser `{force:true}` ;
+  - une variable importée (`G`, `P`, `joy`…) ne peut pas être réaffectée depuis un autre module : passer par sa fonction `set…()`.
+- L'environnement de développement n'a pas accès à unpkg ni à 0.peerjs.com. Le duo se teste avec `?net=local` (deux onglets) en passant temporairement `DUO_ENABLED` à `true`, ou avec un serveur PeerJS local (paquet npm `peer`).
 
 ## Historique des versions
 
@@ -162,6 +182,7 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
 - **0.7 :** renommage en **Antikor**, bouton Labo attractif, nouvelles box en capsule. **0.7.1 :** Labo en haut à droite, JOUER plus gros. **0.7.2 :** noyaux violets et pièces dorées, infobulles, fond de boss. **0.7.3 :** fond de boss = grille d'origine éclaircie. **0.7.4 :** logo sur une ligne.
 - **0.8 :** mode Carrière (25 niveaux, carte, étoiles), 5 fonds de monde, Tourelle et Servomoteur.
 - **0.8.1 :** carte en pleine largeur sur PC, « ? » sur les box, Arsenal lié aux mondes, joystick fixe.
+- **0.8.2 :** réorganisation du code sans changement de jeu : découpage en modules (`css/`, `js/data`, `js/sim`, `js/render`, `js/ui`, `js/net`), simulation séparée de la page (phase 0 du bilan serveur), test Node `tests/sim-bench.mjs`, chemin de l'icône iOS corrigé.
 
 ## Pistes en attente
 
