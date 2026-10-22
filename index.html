@@ -20,7 +20,7 @@
 /* Antikor · arcade néon plein cadre : canvas de jeu + panneaux à coins coupés par-dessus */
 :root{
   --ink:#05070e; --panel:rgba(9,14,28,.94); --line:#1f2f52; --fg:#e8f4ff; --dim:#8ea3c8;
-  --cyan:#3ef2ff; --mag:#ff3d8b; --gold:#ffd23e; --green:#62ff9a; --red:#ff4a3d; --steel:#9fb6ff;
+  --cyan:#3ef2ff; --mag:#ff3d8b; --gold:#ffd23e; --core:#c77dff; --green:#62ff9a; --red:#ff4a3d; --steel:#9fb6ff;
   --f-display:'Bungee','Impact','Arial Black',system-ui,sans-serif;
   --f-ui:'Chakra Petch',system-ui,-apple-system,'Segoe UI',sans-serif;
   --cut:12px;
@@ -81,7 +81,12 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 .chip small svg{width:12px;height:12px;filter:none;color:var(--gold)}
 .play-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .side{display:flex;flex-direction:column;gap:14px;min-width:0}
-.cores-big{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:34px;color:var(--gold);text-shadow:0 0 18px rgba(255,210,62,.45)}
+.cores-big{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:34px;color:var(--core);text-shadow:0 0 18px rgba(199,125,255,.5)}
+.cores-big small{font-family:var(--f-ui);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);text-shadow:none}
+/* Noyaux = monnaie permanente (violet) · Pièces = monnaie de la partie (doré) */
+.nk{color:var(--core)!important;display:inline-flex;align-items:center;gap:5px}
+.price.nk.poor{color:var(--red)!important}
+.cur-lbl{font-family:var(--f-ui);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600}
 .cores-big svg{width:30px;height:30px}
 .kv{display:grid;grid-template-columns:1fr auto;gap:8px 14px;font-size:14px;margin:0}
 .kv dt{color:var(--dim)} .kv dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
@@ -116,7 +121,7 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 .lab-cta-txt b{font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1;letter-spacing:.04em;background:linear-gradient(90deg,#3ef2ff,#ff3d8b);-webkit-background-clip:text;background-clip:text;color:transparent}
 .lab-cta-txt small{font-size:13px;color:var(--dim)}
 .lab-cta-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
-.lab-cta-cores{display:flex;align-items:center;gap:5px;font-family:var(--f-display);font-size:20px;color:var(--gold)}.lab-cta-cores svg{width:18px;height:18px}
+.lab-cta-cores{display:flex;align-items:center;gap:5px;font-family:var(--f-display);font-size:20px;color:var(--core);text-shadow:0 0 12px rgba(199,125,255,.5)}.lab-cta-cores svg{width:18px;height:18px}
 .lab-cta .badge{height:22px;padding:0 9px;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
 .lab-cta.hot .badge{animation:bdg 1.2s ease-in-out infinite}
 @keyframes bdg{50%{box-shadow:0 0 0 6px rgba(255,61,139,0),0 0 16px rgba(255,61,139,.9);transform:scale(1.08)}}
@@ -175,6 +180,19 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 .rw-box svg{width:22px;height:22px}
 .ver{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:max(8px,env(safe-area-inset-bottom,0px));z-index:30;font-size:11px;letter-spacing:.12em;color:var(--dim);opacity:.7;pointer-events:none}
 
+/* ---------- Infobulles ---------- */
+#tip{position:fixed;z-index:60;width:max-content;max-width:min(320px,calc(100vw - 24px));padding:11px 13px;background:rgba(6,9,20,.97);border:1px solid var(--tc,var(--cyan));box-shadow:0 10px 30px rgba(0,0,0,.6),0 0 18px color-mix(in srgb,var(--tc,var(--cyan)) 30%,transparent);font-size:12.5px;line-height:1.45;color:var(--fg);pointer-events:none}
+#tip[hidden]{display:none}
+#tip .th{font-family:var(--f-display);font-size:16px;color:var(--tc,var(--cyan));margin-bottom:4px}
+#tip .ts{color:var(--dim);margin:0 0 6px}
+#tip dl{display:grid;grid-template-columns:1fr auto;gap:2px 14px;margin:6px 0}
+#tip dt{color:var(--dim)}#tip dd{margin:0;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+#tip ul{margin:4px 0;padding-left:16px}#tip li{margin:1px 0}
+#tip .tn{margin:6px 0 0;padding-top:6px;border-top:1px solid var(--line);color:var(--dim)}
+#tip .tg{color:var(--gold)}#tip .tc{color:var(--core)}
+.tipi{display:none;flex:none;width:24px;height:24px;border-radius:50%;place-items:center;border:1px solid var(--line);color:var(--dim);font:700 13px/1 var(--f-ui);background:rgba(0,0,0,.4);cursor:pointer}
+@media (hover:none){.tipi{display:grid}}
+
 /* ---------- Duo ---------- */
 .duo{display:flex;flex-direction:column;gap:10px}
 .duo-row{display:flex;gap:8px;flex-wrap:wrap}
@@ -225,7 +243,7 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 /* ---------- Shop ---------- */
 .shop-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .shop-head .h2{color:var(--gold);text-shadow:0 0 22px rgba(255,210,62,.4)}
-.wallet{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-size:30px;color:var(--gold)}
+.wallet{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--f-display);font-size:30px;color:var(--gold)}
 .wallet svg{width:26px;height:26px}
 .price-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:4px}
 .price{display:flex;align-items:center;gap:6px;font-weight:700;font-size:17px;color:var(--gold);font-variant-numeric:tabular-nums}
@@ -265,7 +283,7 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 .over .h2{font-size:clamp(34px,8vw,64px)}
 .over.win .h2{color:var(--gold);text-shadow:0 0 26px rgba(255,210,62,.5)}
 .over.lose .h2{color:var(--mag);text-shadow:0 0 26px rgba(255,61,139,.5)}
-.reward{display:flex;align-items:center;gap:12px;font-family:var(--f-display);font-size:30px;color:var(--gold)}
+.reward{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:var(--f-display);font-size:30px;color:var(--core)}
 .reward svg{width:30px;height:30px}
 .btnrow{display:flex;gap:10px;flex-wrap:wrap}
 
@@ -379,7 +397,7 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
   <div class="box">
     <div class="lab-head">
       <div><div class="eyebrow">Box et talents permanents</div><h2 class="h2">Labo</h2></div>
-      <div style="display:flex;gap:14px;align-items:center"><div class="cores-big" id="lab-cores"></div><button class="btn cut" id="btn-lab-back">Retour</button></div>
+      <div style="display:flex;gap:14px;align-items:center"><div class="cores-big" id="lab-cores" data-tip="c:core"></div><button class="btn cut" id="btn-lab-back">Retour</button></div>
     </div>
     <div class="sec-title">BOX D’ARMES · <span id="lab-box-sub" style="letter-spacing:.06em;text-transform:none;font-weight:500"></span></div>
     <div class="cards box-row" id="box-list"></div>
@@ -403,6 +421,7 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 </div>
 
 <!-- BOX -->
+<div id="tip" hidden></div>
 <div id="box-open" hidden><div class="bo-stage" id="bo-stage"></div></div>
 <div class="ver" id="ver"></div>
 
@@ -419,7 +438,7 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
   <div class="box">
     <div class="shop-head">
       <div><div class="eyebrow" id="shop-sub">Vague 1 terminée</div><h2 class="h2">Boutique</h2></div>
-      <div class="wallet" id="shop-wallet"></div>
+      <div class="wallet" id="shop-wallet" data-tip="c:coin"></div>
     </div>
     <div class="shop-grid">
       <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
@@ -478,7 +497,7 @@ function compact(a){let j=0;for(let i=0;i<a.length;i++){const o=a[i];if(!o.dead)
 function segDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1;const l=dx*dx+dy*dy;let t=l?((px-x1)*dx+(py-y1)*dy)/l:0;t=clamp(t,0,1);const cx=x1+dx*t-px,cy=y1+dy*t-py;return Math.sqrt(cx*cx+cy*cy);}
 function fmtTime(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 
-const VERSION='0.7.1';
+const VERSION='0.7.2';
 // Mode duo suspendu : le code réseau reste en place mais n'est plus maintenu ni accessible
 const DUO_ENABLED=false;
 /* ================= SAVE ================= */
@@ -750,8 +769,8 @@ const TALENTS=[
  {id:'dmg',icon:'powder',col:'#ffb03e',name:'Puissance',desc:'+5% de dégâts',max:5,cost:14},
  {id:'spd',icon:'boots',col:'#3ef2ff',name:'Agilité',desc:'+4% de vitesse',max:4,cost:10},
  {id:'mag',icon:'magnet',col:'#3ea8ff',name:'Magnétisme',desc:'+15% de rayon de collecte',max:3,cost:8},
- {id:'gold',icon:'gold',col:'#ffd23e',name:'Fortune',desc:'+10% de pièces',max:5,cost:10},
- {id:'start',icon:'wallet',col:'#ffd23e',name:'Capital',desc:'+20 pièces au départ',max:4,cost:8},
+ {id:'gold',icon:'gold',col:'#ffd23e',name:'Fortune',desc:'+10% de pièces ramassées en partie',max:5,cost:10},
+ {id:'start',icon:'wallet',col:'#ffd23e',name:'Capital',desc:'+20 pièces au début de chaque partie',max:4,cost:8},
  {id:'armor',icon:'armor',col:'#9fb6ff',name:'Blindage',desc:'-4% de dégâts subis',max:3,cost:16},
  {id:'reroll',icon:'reroll',col:'#62ff9a',name:'Relance',desc:'+1 relance gratuite par boutique',max:2,cost:28},
  {id:'choice',icon:'cards',col:'#b46bff',name:'Quatrième carte',desc:'4 choix à chaque niveau',max:1,cost:90},
@@ -885,8 +904,20 @@ function makeFloor(){const T=320,S=2;const c=document.createElement('canvas');c.
  g.strokeStyle='#142650';for(let k=0;k<4;k++){g.beginPath();g.arc(rnd()*T,rnd()*T,3+rnd()*6,0,TAU);g.stroke();}
  g.strokeStyle='#132852';g.lineWidth=1.5;for(let k=0;k<2;k++){const x=rnd()*(T-60)+20,y=rnd()*(T-30)+10;g.beginPath();for(let s=0;s<3;s++){g.moveTo(x+s*10,y);g.lineTo(x+s*10+6,y+6);g.lineTo(x+s*10,y+12);}g.stroke();}
  return c;}
-let floorPat=null;
-function initFloor(){floorPat=ctx.createPattern(makeFloor(),'repeat');try{floorPat.setTransform(new DOMMatrix([.5,0,0,.5,0,0]));}catch(e){}}
+// Sol des manches de boss : tissu infecté (cellules, noyaux, vaisseaux), en fondu par-dessus le sol normal
+function makeBossFloor(){const T=640,S=1;const c=document.createElement('canvas');c.width=c.height=T*S;const g=c.getContext('2d');g.scale(S,S);
+ g.fillStyle='#0d0509';g.fillRect(0,0,T,T);
+ let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ const wrap=f=>{for(const ox of[-T,0,T])for(const oy of[-T,0,T]){g.save();g.translate(ox,oy);f();g.restore();}};
+ const cells=[];for(let k=0;k<70;k++)cells.push({x:rnd()*T,y:rnd()*T,rx:12+rnd()*20,ry:10+rnd()*15,a:rnd()*Math.PI,nx:rnd()*.5-.25,ny:rnd()*.5-.25});
+ const veins=[];for(let k=0;k<6;k++){let x=rnd()*T,y=rnd()*T,a=rnd()*TAU;const pts=[[x,y]];for(let s=0;s<9;s++){a+=rnd()*.9-.45;x+=Math.cos(a)*45;y+=Math.sin(a)*45;pts.push([x,y]);}veins.push(pts);}
+ wrap(()=>{g.strokeStyle='rgba(120,20,48,.4)';g.lineWidth=3;g.lineCap='round';g.lineJoin='round';for(const v of veins){g.beginPath();g.moveTo(v[0][0],v[0][1]);for(let i=1;i<v.length-1;i++){const mx=(v[i][0]+v[i+1][0])/2,my=(v[i][1]+v[i+1][1])/2;g.quadraticCurveTo(v[i][0],v[i][1],mx,my);}g.stroke();}
+  for(const q of cells){g.save();g.translate(q.x,q.y);g.rotate(q.a);g.fillStyle='rgba(70,12,30,.45)';g.strokeStyle='rgba(170,36,80,.38)';g.lineWidth=1.4;g.beginPath();g.ellipse(0,0,q.rx,q.ry,0,0,TAU);g.fill();g.stroke();
+   g.fillStyle='rgba(200,50,100,.28)';g.beginPath();g.ellipse(q.rx*q.nx,q.ry*q.ny,q.rx*.28,q.ry*.3,0,0,TAU);g.fill();g.restore();}});
+ return c;}
+let floorPat=null,bossPat=null;const BVIGN={};
+function bossVign(col){return BVIGN[col]||(BVIGN[col]=makeVign(hexA(col,.75)));}
+function initFloor(){floorPat=ctx.createPattern(makeFloor(),'repeat');bossPat=ctx.createPattern(makeBossFloor(),'repeat');try{floorPat.setTransform(new DOMMatrix([.5,0,0,.5,0,0]));}catch(e){}}
 
 /* ================= STATE ================= */
 // G = partie en cours, P = joueur « courant » (celui dont on exécute les armes / options), ME = index du joueur local
@@ -1161,7 +1192,7 @@ function openShop(){G.state='shop';joy=null;
  refreshViews();}
 function shopView(pl){return withP(pl,()=>{const coins=Math.floor(P.coins);const sh=P.shop;const duo=G.players.length>1;const v={};
  v.sub=`Vague ${G.wave} terminée · PV restaurés de 30%`+(duo?' · '+plName(P):'');
- v.wallet=svg('gold',2)+`<span class="num">${coins}</span>`;
+ v.wallet=svg('gold',2)+`<span class="num">${coins}</span><span class="cur-lbl" style="align-self:flex-end;margin-bottom:5px">pièces · cette partie</span>`;
  v.cards=sh.offers.map((s,idx)=>{const i=optInfo(s.o);const pr=priceOf(s.o);const ok=validOpt(s.o);
   const extra=`<div class="price-row"><span class="price ${!s.sold&&pr>coins?'poor':''}">${s.sold?'ACHETÉ':svg('gold',2)+pr}</span>${s.sold?'':`<span class="lockbtn ${s.locked?'on':''}" data-lock="${idx}" role="button" aria-label="Garder pour la prochaine boutique" title="Garder pour la prochaine boutique">${svg('lock')}</span>`}</div>`;
   return cardHTML(i,idx,extra).replace('class="card cut','class="card cut'+(s.sold?' sold':'')+(!ok&&!s.sold?' na':''));}).join('');
@@ -1202,10 +1233,10 @@ function showOver(d){const M=MODES[d.mode];const waves=d.win?d.wave:d.wave-1;
  $('#over-box').className='box over '+(d.win?'win':'lose');
  $('#over-title').textContent=d.win?'VICTOIRE':d.quit?'ABANDON':(d.duo?'VOUS AVEZ CHUTÉ':'TU AS CHUTÉ');
  $('#over-sub').textContent=`${M.name}${d.duo?' · duo':''} · ${d.win?'toutes les vagues tenues':'vague '+d.wave}${newRec?' · nouveau record':''}`;
- const st=[['Vague atteinte',M.endless?d.wave:`${d.wave} / ${M.waves}`],['Temps',fmtTime(d.time)],['Éliminations',d.kills],['Meilleur combo',d.maxCombo],['Dégâts infligés',d.dmg.toLocaleString('fr-FR')],['Niveau',d.level],['Pièces gagnées',d.coins]];
+ const st=[['Vague atteinte',M.endless?d.wave:`${d.wave} / ${M.waves}`],['Temps',fmtTime(d.time)],['Éliminations',d.kills],['Meilleur combo',d.maxCombo],['Dégâts infligés',d.dmg.toLocaleString('fr-FR')],['Niveau',d.level],['Pièces ramassées (partie)',d.coins]];
  $('#over-stats').innerHTML=st.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('');
  const bx=d.boxes||{};save.boxes.std+=bx.std|0;save.boxes.prem+=bx.prem|0;persist();
- $('#over-reward').innerHTML=(d.quit?`<span style="font-size:15px;color:var(--dim);font-family:var(--f-ui)">Partie abandonnée : aucun noyau.</span>`:svg('core',2)+`+${cores} noyaux`)+((bx.std|0)?` <span class="rw-box" style="--c:${BOXES.std.col}">${svg('box',2)}+${bx.std} ${BOXES.std.name}</span>`:'')+((bx.prem|0)?` <span class="rw-box" style="--c:${BOXES.prem.col}">${svg('box',2)}+${bx.prem} ${BOXES.prem.name}</span>`:'');
+ $('#over-reward').innerHTML=(d.quit?`<span style="font-size:15px;color:var(--dim);font-family:var(--f-ui)">Partie abandonnée : aucun noyau.</span>`:svg('core',2)+`+${cores} noyaux <span class="cur-lbl">gardés pour toujours</span>`)+((bx.std|0)?` <span class="rw-box" style="--c:${BOXES.std.col}">${svg('box',2)}+${bx.std} ${BOXES.std.name}</span>`:'')+((bx.prem|0)?` <span class="rw-box" style="--c:${BOXES.prem.col}">${svg('box',2)}+${bx.prem} ${BOXES.prem.name}</span>`:'');
  const guest=NET.role==='guest'&&d.duo;const again=$('#btn-again');again.disabled=guest;again.textContent=guest?'L’hôte relance…':'Rejouer';
  $('#hud').hidden=true;show('scr-over');}
 
@@ -1373,7 +1404,7 @@ const endJoy=e=>{if(joy&&e.pointerId===joy.id)joy=null;};
 cvs.addEventListener('pointerup',endJoy);cvs.addEventListener('pointercancel',endJoy);
 
 /* ================= UI ================= */
-function show(id){for(const s of document.querySelectorAll('.screen'))s.hidden=s.id!==id;}
+function show(id){hideTip();for(const s of document.querySelectorAll('.screen'))s.hidden=s.id!==id;}
 function currentScreen(){const s=[...document.querySelectorAll('.screen')].find(x=>!x.hidden);return s?s.id:null;}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function banner(main,sub,col){rec(['banner',main,sub,col]);const b=$('#banner');$('#b-main').textContent=main;$('#b-sub').textContent=sub||'';b.style.setProperty('--bc',col||'#3ef2ff');b.classList.remove('show');void b.offsetWidth;b.classList.add('show');}
@@ -1428,39 +1459,39 @@ function renderDuo(){const el=$('#duo-panel');const duo=save.players==='duo';el.
  h+=`<details class="netlog"${NET.logOpen?' open':''}><summary>Journal de connexion</summary><pre id="net-log">${esc(NETLOG.join('\n'))||'(vide)'}</pre><div class="duo-row"><button class="btn cut" data-net="copylog">Copier le journal</button></div></details>`;
  el.innerHTML=h;const pre=$('#net-log');if(pre)pre.scrollTop=pre.scrollHeight;
  el.querySelector('details').addEventListener('toggle',ev=>{NET.logOpen=ev.target.open;});}
-function renderLab(){$('#lab-cores').innerHTML=svg('core',2)+`<span class="num">${save.cores}</span>`;
- const nb=save.boxes.std+save.boxes.prem;$('#lab-box-sub').textContent=nb?nb+' à ouvrir':'une arme au hasard, aussi lâchées par les boss';renderBox();
+function renderLab(){$('#lab-cores').innerHTML=svg('core',2)+`<span class="num">${save.cores}</span><small>noyaux</small>`;
+ const nb=save.boxes.std+save.boxes.prem;$('#lab-box-sub').textContent=nb?nb+' à ouvrir':'une arme au hasard, aussi lâchées par les boss';renderBox();setTimeout(retip);
  $('#lab-talents').innerHTML=TALENTS.map((t,i)=>{const l=T(t.id);const max=l>=t.max;const cost=talentCost(t,l);
-  return `<button class="card cut tal" data-t="${i}" ${max||save.cores<cost?'aria-disabled="true"':''} style="--c:${t.col}"><div class="card-top"><span class="ico">${svg(t.icon)}</span><span class="tag">${max?'MAX':'NIV '+l+' / '+t.max}</span></div><div class="card-name">${t.name}</div>${pips({from:l,to:l,max:t.max})}<p class="card-desc">${t.desc}</p><div class="price-row"><span class="price ${!max&&save.cores<cost?'poor':''}">${max?'MAX':svg('core',2)+cost}</span></div></button>`;}).join('');}
+  return `<button class="card cut tal" data-t="${i}" data-tip="t:${t.id}" ${max||save.cores<cost?'aria-disabled="true"':''} style="--c:${t.col}"><div class="card-top"><span class="ico">${svg(t.icon)}</span><span class="tag">${max?'MAX':'NIV '+l+' / '+t.max}</span><span class="tipi" data-tipi>?</span></div><div class="card-name">${t.name}</div>${pips({from:l,to:l,max:t.max})}<p class="card-desc">${t.desc}</p><div class="price-row"><span class="price ${max?'':'nk'} ${!max&&save.cores<cost?'poor':''}">${max?'MAX':svg('core',2)+cost+' noyaux'}</span></div></button>`;}).join('');}
 /* ---------- Inventaire & box ---------- */
 function stacks(){const m=new Map();for(const it of save.inv){const k=it.id+'|'+it.r;if(!m.has(k))m.set(k,{id:it.id,r:it.r,items:[]});m.get(k).items.push(it);}
  return[...m.values()].sort((a,b)=>b.r-a.r||Object.keys(WEAPONS).indexOf(a.id)-Object.keys(WEAPONS).indexOf(b.id));}
 function renderEquip(){const it=equipped();const d=WEAPONS[it.id],R=RARITY[it.r];const nb=save.boxes.std+save.boxes.prem;
- $('#equip-card').innerHTML=`<div class="equip-card cut" style="--c:${d.col};--rc:${R.col}"><span class="ico">${svg(it.id)}</span><div style="min-width:0"><b>${d.name}</b><span class="rar" style="--rc:${R.col}">${R.name}</span><small>${rarBonus(it.r)} · ${Object.keys(ownedMap()).length}/${Object.keys(WEAPONS).length} armes</small></div></div>`;
+ $('#equip-card').innerHTML=`<div class="equip-card cut" data-tip="w:${it.id}:${it.r}" style="--c:${d.col};--rc:${R.col}"><span class="ico">${svg(it.id)}</span><div style="min-width:0"><b>${d.name}</b><span class="rar" style="--rc:${R.col}">${R.name}</span><small>${rarBonus(it.r)} · ${Object.keys(ownedMap()).length}/${Object.keys(WEAPONS).length} armes</small></div></div>`;
  const owned=Object.keys(ownedMap()).length,all=Object.keys(WEAPONS).length;
  $('#btn-inv').innerHTML=`${svg('arsenal')}<span>Inventaire</span><small>${owned}/${all} armes</small>`;
  const L=$('#btn-lab');L.classList.toggle('hot',nb>0);
  L.innerHTML=`<span class="box-art">${boxArt()}</span><span class="lab-cta-txt"><b>LABO</b><small>${nb?'Des box t’attendent !':'Box d’armes · talents'}</small></span>
-  <span class="lab-cta-side"><span class="lab-cta-cores">${svg('core',2)}${save.cores}</span>${nb?`<span class="badge">${nb} box à ouvrir</span>`:'<span class="arrow">→</span>'}</span>`;}
-function renderInv(){const eq=equipped();
+  <span class="lab-cta-side"><span class="lab-cta-cores" data-tip="c:core">${svg('core',2)}${save.cores}<span class="cur-lbl">noyaux</span></span>${nb?`<span class="badge">${nb} box à ouvrir</span>`:'<span class="arrow">→</span>'}</span>`;}
+function renderInv(){const eq=equipped();setTimeout(retip);
  $('#inv-grid').innerHTML=stacks().map(st=>{const d=WEAPONS[st.id],R=RARITY[st.r];const on=st.items.some(x=>x.u===eq.u);const n=st.items.length;
-  return `<div class="card cut inv-card ${on?'on':''}" style="--c:${d.col};--rc:${R.col}" data-eq="${st.id}|${st.r}" role="button" tabindex="0">
-   <div class="card-top"><span class="ico">${svg(st.id)}</span><span class="count">×${n}</span></div>
+  return `<div class="card cut inv-card ${on?'on':''}" style="--c:${d.col};--rc:${R.col}" data-eq="${st.id}|${st.r}" data-tip="w:${st.id}:${st.r}" role="button" tabindex="0">
+   <div class="card-top"><span class="ico">${svg(st.id)}</span><span class="count">×${n}</span><span class="tipi" data-tipi>?</span></div>
    <div class="card-name">${d.name}</div><span class="rar" style="--rc:${R.col}">${R.name}</span>
    <p class="card-desc">${rarBonus(st.r)}</p><p class="card-hint">Évolution : ${d.evoName} (avec ${PASSIVES[d.evoWith].name})</p>
    <div class="inv-actions">${on?'<span class="tag" style="background:var(--cyan)">ÉQUIPÉE</span>':'<button class="btn cut" data-eq="'+st.id+'|'+st.r+'">Équiper</button>'}
    ${st.r<4?`<button class="btn ${n>=3?'btn-gold':''} cut" data-fuse="${st.id}|${st.r}" ${n>=3?'':'disabled'}>Fusion ${Math.min(n,3)}/3 → ${RARITY[st.r+1].name}</button>`:''}</div></div>`;}).join('');
  const own=ownedMap();const miss=Object.keys(WEAPONS).filter(id=>own[id]===undefined);
- $('#inv-missing').innerHTML=miss.length?miss.map(id=>`<div class="card cut inv-card missing"><div class="card-top"><span class="ico">${svg('lock')}</span></div><div class="card-name">${WEAPONS[id].name}</div><p class="card-desc">${WEAPONS[id].up[0]}</p></div>`).join(''):'<p class="empty">Collection complète !</p>';}
+ $('#inv-missing').innerHTML=miss.length?miss.map(id=>`<div class="card cut inv-card missing" data-tip="w:${id}:0"><div class="card-top"><span class="ico">${svg('lock')}</span><span class="tipi" data-tipi>?</span></div><div class="card-name">${WEAPONS[id].name}</div><p class="card-desc">${WEAPONS[id].up[0]}</p></div>`).join(''):'<p class="empty">Collection complète !</p>';}
 function equipStack(key){const[id,r]=key.split('|');const it=save.inv.find(x=>x.id===id&&x.r===+r);if(!it)return;save.equip=it.u;persist();Sfx.click();renderInv();}
 function fuse(key){const[id,r0]=key.split('|');const r=+r0;const its=save.inv.filter(x=>x.id===id&&x.r===r);if(its.length<3||r>=4){Sfx.deny();return;}
  const used=its.slice(0,3);const wasEq=used.some(x=>x.u===save.equip);save.inv=save.inv.filter(x=>!used.includes(x));const nu={u:save.uid++,id,r:r+1};save.inv.push(nu);if(wasEq)save.equip=nu.u;persist();
  renderInv();showReveal(nu,false,'FUSION !');}
 function renderBox(){
  $('#box-list').innerHTML=Object.entries(BOXES).map(([k,B])=>{const n=save.boxes[k];const tot=B.odds.reduce((a,b)=>a+b,0);
-  return `<div class="card cut box-card" style="--c:${B.col}"><div class="card-top"><span class="tag">${n?n+' EN STOCK':'BOX'}</span></div><div class="box-art">${boxArt()}</div><div class="card-name">${B.name}</div>
+  return `<div class="card cut box-card" style="--c:${B.col}" data-tip="b:${k}"><div class="card-top"><span class="tag">${n?n+' EN STOCK':'BOX'}</span><span class="tipi" data-tipi>?</span></div><div class="box-art">${boxArt()}</div><div class="card-name">${B.name}</div>
    <dl class="odds">${B.odds.map((o,r)=>o?`<dt style="--rc:${RARITY[r].col}">${RARITY[r].name}</dt><dd>${(o/tot*100).toFixed(o/tot<.01?1:0)}%</dd>`:'').join('')}</dl>
-   <div class="inv-actions">${n?`<button class="btn btn-gold cut" data-open="${k}">Ouvrir (${n})</button>`:''}<button class="btn cut" data-buy="${k}" ${save.cores<B.cost?'disabled':''}>Acheter · ${svg('core',2)}${B.cost}</button></div></div>`;}).join('');}
+   <div class="inv-actions">${n?`<button class="btn btn-gold cut" data-open="${k}">Ouvrir (${n})</button>`:''}<button class="btn cut" data-buy="${k}" ${save.cores<B.cost?'disabled':''}>Acheter · <span class="nk">${svg('core',2)}${B.cost}</span></button></div></div>`;}).join('');}
 function rollBox(k){const B=BOXES[k];let x=Math.random()*B.odds.reduce((a,b)=>a+b,0),r=0;for(;r<4;r++){x-=B.odds[r];if(x<0)break;}return{id:pick(Object.keys(WEAPONS)),r};}
 // Ouverture : la box tremble et change de couleur jusqu'à sa vraie rareté, puis l'arme apparaît
 let boTO=[];
@@ -1477,7 +1508,7 @@ function openBox(k,buy){if(buy){if(save.cores<BOXES[k].cost){Sfx.deny();return;}
  ov.onclick=e=>{if(e.target.closest('button'))return;if($('#bo-box')&&!$('.bo-card')){for(const t of boTO)clearTimeout(t);showReveal(it,isNew);}};}
 function showReveal(it,isNew,title){const ov=$('#box-open');ov.hidden=false;const d=WEAPONS[it.id],R=RARITY[it.r];const k=ov.dataset.k||'std';
  const same=save.inv.filter(x=>x.id===it.id&&x.r===it.r).length;
- const again=title?'':(save.boxes[k]>0?`<button class="btn btn-gold cut" data-again="open">Ouvrir une autre (${save.boxes[k]})</button>`:(save.cores>=BOXES[k].cost?`<button class="btn btn-gold cut" data-again="buy">Racheter · ${svg('core',2)}${BOXES[k].cost}</button>`:''));
+ const again=title?'':(save.boxes[k]>0?`<button class="btn btn-gold cut" data-again="open">Ouvrir une autre (${save.boxes[k]})</button>`:(save.cores>=BOXES[k].cost?`<button class="btn btn-gold cut" data-again="buy">Racheter · ${svg('core',2)}${BOXES[k].cost} noyaux</button>`:''));
  $('#bo-stage').innerHTML=`${title?`<div class="bo-new">${title}</div>`:isNew?'<div class="bo-new">NOUVELLE ARME !</div>':''}
   <div class="bo-card" style="--rc:${R.col}"><div class="card cut inv-card" style="--c:${d.col};--rc:${R.col}"><div class="card-top"><span class="ico">${svg(it.id)}</span><span class="tag" style="background:${R.col}">${R.name.toUpperCase()}</span></div>
   <div class="card-name">${d.name}</div><p class="card-desc">${d.up[0]}</p><p class="card-hint">${rarBonus(it.r)}</p>${same>=3&&it.r<4?`<p class="card-hint">Tu en as ${same} : fusion possible dans l’inventaire !</p>`:''}</div></div>
@@ -1487,6 +1518,47 @@ function showReveal(it,isNew,title){const ov=$('#box-open');ov.hidden=false;cons
   if(a==='open')openBox(k,false);else if(a==='buy')openBox(k,true);
   else{if(a==='equip'){save.equip=it.u;persist();}ov.hidden=true;refreshMeta();}};}
 function refreshMeta(){const c=currentScreen();if(c==='scr-lab')renderLab();else if(c==='scr-inv')renderInv();else if(c==='scr-menu')renderMenu();}
+/* ---------- Infobulles : détails des armes, talents, box et monnaies ---------- */
+const STAT_LBL={dmg:'Dégâts',cd:'Recharge (s)',n:'Nombre',pierce:'Perforation',R:'Rayon',len:'Portée',ch:'Rebonds',burn:'Brûlure (toutes les 0,3 s)',boom:'Explosion',dur:'Durée (s)',fz:'Gel après (s)'};
+const TFX={slot:l=>`${1+l} arme${l?'s':''} en même temps`,hp:l=>`+${10*l} PV max`,dmg:l=>`+${5*l}% de dégâts`,spd:l=>`+${4*l}% de vitesse`,mag:l=>`+${15*l}% de rayon de collecte`,
+ gold:l=>`+${10*l}% de pièces ramassées`,start:l=>`+${20*l} pièces au départ`,armor:l=>`-${4*l}% de dégâts subis`,reroll:l=>`${l} relance${l>1?'s':''} gratuite${l>1?'s':''} par boutique`,
+ choice:l=>`${3+l} cartes à chaque niveau`,revive:l=>l?'1 résurrection à 50% PV par partie':'Aucune résurrection'};
+const TNOTE={slot:'Au départ tu n’as que l’arme équipée. Les emplacements en plus se remplissent avec les armes trouvées en partie (cartes de niveau et boutique), parmi celles de ton inventaire.',
+ hp:'Points de vie de départ. Les PV remontent un peu entre les vagues.',dmg:'S’applique à toutes tes armes.',spd:'Vitesse de déplacement de ta cellule.',
+ mag:'Distance à laquelle les gemmes d’XP et les pièces viennent toutes seules à toi.',gold:'Les pièces servent uniquement dans la boutique entre les vagues et disparaissent à la fin de la partie.',
+ start:'Pratique pour acheter une amélioration dès la première boutique. Les pièces ne se gardent pas d’une partie à l’autre.',armor:'Réduit les dégâts de contact et des projectiles ennemis.',
+ reroll:'Relancer remplace les offres de la boutique (les offres verrouillées sont gardées).',choice:'Une carte de plus à choisir à chaque montée de niveau.',revive:'Quand tes PV tombent à zéro, tu reviens une fois avec la moitié de tes PV et une onde qui repousse les ennemis.'};
+function fmtN(v){return Math.abs(v-Math.round(v))<.01||v>=20?String(Math.round(v)):v.toFixed(v<1?2:1).replace('.',',');}
+function weaponTip(id,r){const d=WEAPONS[id],R=RARITY[r];const a=d.stats(1),b=d.stats(5);
+ const mul=k=>k==='dmg'||k==='burn'||k==='boom'?R.dmg:k==='cd'?R.cd:k==='R'||k==='len'?R.area:1;
+ const rows=Object.keys(a).filter(k=>STAT_LBL[k]).map(k=>`<dt>${STAT_LBL[k]}</dt><dd>${fmtN(a[k]*mul(k))} → ${fmtN(b[k]*mul(k))}</dd>`).join('');
+ return{col:R.col,html:`<div class="th">${d.name}</div><p class="ts">${R.name} · ${rarBonus(r)}</p><div>${d.up[0]}</div>
+ <dl>${rows}</dl><div class="ts" style="margin:0">Niveau 1 → 5${R.dmg>1||R.cd<1?' (bonus de rareté inclus)':''}</div>
+ <ul>${d.up.slice(1).map((u,i)=>`<li>Niv ${i+2} : ${u}</li>`).join('')}</ul>
+ <p class="tn"><span class="tg">Évolution ${d.evoName}</span> : ${d.evoDesc} Il faut l’arme au niveau 5 et l’équipement ${PASSIVES[d.evoWith].name}.</p>`};}
+function tipData(key){const[k,a,b]=key.split(':');
+ if(k==='w'&&WEAPONS[a])return weaponTip(a,+b||0);
+ if(k==='t'){const t=TALENTS.find(x=>x.id===a);if(!t)return null;const l=T(t.id);const max=l>=t.max;
+  return{col:t.col,html:`<div class="th">${t.name}</div><p class="ts">Niveau ${l} / ${t.max}</p><dl><dt>Actuellement</dt><dd>${TFX[t.id](l)}</dd>${max?'':`<dt>Niveau suivant</dt><dd>${TFX[t.id](l+1)}</dd><dt>Coût</dt><dd class="tc">${talentCost(t,l)} noyaux</dd>`}</dl><p class="tn">${TNOTE[t.id]}</p>`};}
+ if(k==='b'&&BOXES[a]){const B=BOXES[a];const tot=B.odds.reduce((x,y)=>x+y,0);
+  return{col:B.col,html:`<div class="th">${B.name}</div><div>Contient <b>1 arme au hasard</b> parmi les ${Object.keys(WEAPONS).length} du jeu.</div>
+  <dl>${B.odds.map((o,r)=>o?`<dt style="color:${RARITY[r].col}">${RARITY[r].name}</dt><dd>${(o/tot*100).toFixed(o/tot<.01?1:0)}% · ${rarBonus(r)}</dd>`:'').join('')}</dl>
+  <p class="tn">Doublons : 3 armes identiques de même rareté fusionnent en une rareté supérieure (inventaire). Les boss lâchent aussi des box${a==='prem'?' (la Box Mutante vient du boss final)':''}.</p>`};}
+ if(k==='c'&&a==='core')return{col:'#c77dff',html:`<div class="th">Noyaux</div><div>Monnaie <b class="tc">permanente</b>, gagnée à la fin de chaque partie selon les vagues tenues, les éliminations et les boss.</div><p class="tn">Se dépensent au labo : box d’armes et talents. Une partie abandonnée ne rapporte aucun noyau.</p>`};
+ if(k==='c'&&a==='coin')return{col:'#ffd23e',html:`<div class="th">Pièces</div><div>Monnaie <b class="tg">de la partie en cours</b>, ramassée sur les ennemis.</div><p class="tn">Elles servent dans cette boutique entre les vagues, puis disparaissent à la fin de la partie. Rien à voir avec les noyaux (violets), qui eux se gardent.</p>`};
+ return null;}
+let tipEl=null;
+function showTip(el){const key=el.dataset.tip;const d=key&&tipData(key);if(!d)return;const t=$('#tip');t.innerHTML=d.html;t.style.setProperty('--tc',d.col);t.hidden=false;tipEl=el;
+ const r=el.getBoundingClientRect(),w=t.offsetWidth,h=t.offsetHeight;let x=r.left+r.width/2-w/2,y=r.bottom+8;
+ if(y+h>innerHeight-8)y=r.top-h-8;if(y<8)y=Math.max(8,Math.min(innerHeight-h-8,r.top+12));x=clamp(x,12,innerWidth-w-12);t.style.left=x+'px';t.style.top=y+'px';}
+function hideTip(){$('#tip').hidden=true;tipEl=null;}
+// après un nouvel affichage (achat, fusion…), l'infobulle suit le nouvel élément et ses valeurs à jour
+function retip(){if(!tipEl||document.body.contains(tipEl))return;const n=document.querySelector(`.screen:not([hidden]) [data-tip="${tipEl.dataset.tip}"]`);if(n)showTip(n);else hideTip();}
+document.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse')return;const el=e.target.closest('[data-tip]');if(el===tipEl)return;if(el)showTip(el);else hideTip();});
+document.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'&&!e.target.closest('[data-tipi]'))hideTip();});
+// Écran tactile : le bouton « ? » ouvre l'infobulle sans déclencher l'action de la carte
+document.addEventListener('click',e=>{const i=e.target.closest('[data-tipi]');if(!i)return;e.stopPropagation();e.preventDefault();const el=i.closest('[data-tip]');if(el===tipEl)hideTip();else if(el)showTip(el);},true);
+addEventListener('scroll',hideTip,true);
 function flashDeny(el){Sfx.deny();if(el){el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');}}
 
 $('#players-seg').addEventListener('click',e=>{const b=e.target.closest('[data-players]');if(!b||b.disabled)return;const v=b.dataset.players;Sfx.init();Sfx.click();if(v===save.players)return;
@@ -1562,10 +1634,14 @@ function render(rdt){
  const cam=G?G.cam:demo.cam;const sh=G?G.shake:0;const shx=(Math.random()*2-1)*sh,shy=(Math.random()*2-1)*sh;
  setWorld(cam,shx,shy);
  if(floorPat){ctx.fillStyle=floorPat;ctx.fillRect(cam.x-HW-4,cam.y-HH-4,HW*2+8,HH*2+8);}
+ if(G){const tgt=G.isBoss&&!G.bossDead&&(G.state==='play'||G.state==='pause'||G.state==='level'||G.state==='dying')?1:0;G.bossFx=(G.bossFx||0)+(tgt-(G.bossFx||0))*Math.min(1,rdt*1.4);
+  if(G.bossFx>.01&&bossPat){ctx.globalAlpha=G.bossFx;ctx.fillStyle=bossPat;ctx.fillRect(cam.x-HW-4,cam.y-HH-4,HW*2+8,HH*2+8);ctx.globalAlpha=1;}}
  if(!G){drawDemo();}else drawWorld(cam);
  // screen space
  ctx.setTransform(1,0,0,1,0,0);ctx.globalCompositeOperation='source-over';
  if(vign)ctx.drawImage(vign,0,0,cvs.width,cvs.height);
+ // manche de boss : bords de l'écran teintés à la couleur du boss, qui battent comme un cœur
+ if(G&&G.bossFx>.01){const col=(G.boss&&G.boss.col)||'#ff3d8b';const beat=Math.pow(Math.max(0,Math.sin(G.t*2.6)),10);ctx.globalAlpha=G.bossFx*(.45+.4*beat);ctx.drawImage(bossVign(col),0,0,cvs.width,cvs.height);ctx.globalAlpha=1;}
  if(G&&P){if(G.players.length>1)drawMateArrow();const low=!P.down&&P.hp/P.maxHp<.3&&G.state==='play';const a=Math.max(G.hurtFlash*1.6,low?.35+.25*Math.sin(G.t*6):0);if(a>0){ctx.globalAlpha=Math.min(1,a);ctx.drawImage(vignRed,0,0,cvs.width,cvs.height);ctx.globalAlpha=1;}
   if(G.whiteFlash>0){ctx.fillStyle=`rgba(255,255,255,${Math.min(.85,G.whiteFlash)})`;ctx.fillRect(0,0,cvs.width,cvs.height);}
   if(joy&&G.state==='play'){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.strokeStyle='rgba(62,242,255,.4)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(joy.ox,joy.oy,58,0,TAU);ctx.stroke();
