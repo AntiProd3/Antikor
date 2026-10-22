@@ -7,7 +7,7 @@ Jeu d'arcade néon en un seul fichier HTML, publié avec GitHub Pages. Le corps 
 - Jouer : https://antoinecorcos.github.io/neonhorde/
 - Code : `index.html`
 
-Version actuelle : **0.7** (affichée en bas à droite du jeu).
+Version actuelle : **0.7.1** (affichée en bas à droite du jeu).
 
 ## Armes, raretés et box
 

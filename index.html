@@ -48,7 +48,7 @@ button{font-family:inherit;color:inherit}
 .btn:hover{border-color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan),0 0 18px rgba(62,242,255,.22)}
 .btn:active{transform:translateY(1px)}
 .btn[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none;border-color:var(--line)}
-.btn-primary{font-family:var(--f-display);font-size:30px;letter-spacing:.04em;background:var(--cyan);color:#021219;border:none;padding:18px 34px;box-shadow:0 0 34px rgba(62,242,255,.45)}
+.btn-primary{font-family:var(--f-display);font-size:44px;letter-spacing:.05em;background:var(--cyan);color:#021219;border:none;padding:22px 64px;box-shadow:0 0 34px rgba(62,242,255,.45)}
 .btn-primary:hover{background:#7ff7ff;box-shadow:0 0 44px rgba(62,242,255,.7)}
 .btn-gold{background:var(--gold);color:#1c1300;border:none;font-weight:700}
 .btn-gold:hover{background:#ffe27a;box-shadow:0 0 24px rgba(255,210,62,.5)}
@@ -60,7 +60,7 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 #scr-menu{background:radial-gradient(ellipse at 30% 40%,rgba(5,8,18,.2),rgba(2,3,8,.82))}
 .menu{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:28px;align-items:start}
 .menu-main{display:flex;flex-direction:column;gap:20px;min-width:0}
-.logo{font-family:var(--f-display);font-size:clamp(56px,12vw,124px);line-height:.86;margin:0;letter-spacing:.01em}
+.logo{font-family:var(--f-display);font-size:clamp(56px,min(12vw,13.5vh),124px);line-height:.86;margin:0;letter-spacing:.01em}
 .logo .l1{display:block;color:var(--cyan);text-shadow:0 0 6px rgba(62,242,255,.9),0 0 28px rgba(62,242,255,.55),0 0 60px rgba(62,242,255,.3)}
 .logo .l2{display:block;color:var(--mag);text-shadow:0 0 6px rgba(255,61,139,.9),0 0 28px rgba(255,61,139,.55),0 0 60px rgba(255,61,139,.3);animation:flick 5s 1.2s infinite}
 @keyframes flick{0%,92%,100%{opacity:1}93%{opacity:.35}94%{opacity:1}96%{opacity:.5}97%{opacity:1}}
@@ -89,6 +89,7 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
 .help b{color:var(--fg);font-weight:600}
 .seg.two{grid-template-columns:repeat(2,minmax(0,1fr))}
 .seg button[disabled]{cursor:not-allowed;opacity:.55}
+@media (max-height:780px) and (min-width:761px){.menu-main{gap:14px}.btn-primary{font-size:38px;padding:18px 56px}}
 @media (max-width:760px){.menu{grid-template-columns:1fr}.seg{grid-template-columns:1fr}.seg.two{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* ---------- Raretés, inventaire, box ---------- */
@@ -351,20 +352,15 @@ kbd{font:600 11px/1 var(--f-ui);padding:3px 6px;border:1px solid currentColor;op
   <div class="box menu">
     <div class="menu-main">
       <h1 class="logo"><span class="l1">ANTI</span><span class="l2">KOR</span></h1>
-      <p class="tagline">Le corps est envahi. Tu es sa dernière défense : tiens jusqu’à la dernière vague, ouvre des box et fais muter ton arsenal.</p>
+      <p class="tagline">Tiens jusqu’à la dernière vague. Ouvre des box, collectionne les armes rares et fais évoluer ton arsenal.</p>
       <div class="group"><div class="eyebrow">Joueurs</div><div class="seg two" id="players-seg"></div></div>
       <div class="panel cut duo" id="duo-panel" hidden></div>
       <div class="group"><div class="eyebrow">Mode</div><div class="seg" id="mode-seg"></div></div>
       <div class="group"><div class="eyebrow">Arme équipée</div><div class="equip"><div id="equip-card"></div><button class="btn cut inv-btn" id="btn-inv"></button></div></div>
-      <button class="lab-cta cut" id="btn-lab"></button>
       <div class="play-row"><button class="btn btn-primary cut" id="btn-play">JOUER</button><kbd>Entrée</kbd></div>
     </div>
     <div class="side">
-      <div class="panel cut">
-        <div class="eyebrow">Noyaux</div>
-        <div class="cores-big" id="menu-cores"></div>
-        <p class="help" style="margin:6px 0 0">Gagnés à chaque partie. Dépense-les au labo : box d’armes et talents permanents.</p>
-      </div>
+      <button class="lab-cta cut" id="btn-lab"></button>
       <div class="panel cut">
         <div class="eyebrow" style="margin-bottom:10px">Records</div>
         <dl class="kv" id="menu-records"></dl>
@@ -482,7 +478,7 @@ function compact(a){let j=0;for(let i=0;i<a.length;i++){const o=a[i];if(!o.dead)
 function segDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1;const l=dx*dx+dy*dy;let t=l?((px-x1)*dx+(py-y1)*dy)/l:0;t=clamp(t,0,1);const cx=x1+dx*t-px,cy=y1+dy*t-py;return Math.sqrt(cx*cx+cy*cy);}
 function fmtTime(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 
-const VERSION='0.7';
+const VERSION='0.7.1';
 // Mode duo suspendu : le code réseau reste en place mais n'est plus maintenu ni accessible
 const DUO_ENABLED=false;
 /* ================= SAVE ================= */
@@ -1404,7 +1400,6 @@ function renderMenu(){
  const mode=guest&&NET.hostMode?NET.hostMode:save.mode;
  $('#mode-seg').innerHTML=Object.values(MODES).map(m=>`<button class="cut ${mode===m.id?'on':''}" data-mode="${m.id}" ${guest?'disabled':''}><b>${m.name}</b><span>${m.sub}</span></button>`).join('');
  renderEquip();
- $('#menu-cores').innerHTML=svg('core',2)+`<span class="num">${save.cores}</span>`;
  const rec=m=>{const b=save.best[m];if(!b)return'—';return MODES[m].endless?'vague '+b:(b>=MODES[m].waves?'terminé':'vague '+b);};
  $('#menu-records').innerHTML=`<dt>Sprint</dt><dd>${rec('sprint')}</dd><dt>Marathon</dt><dd>${rec('marathon')}</dd><dt>Infini</dt><dd>${rec('endless')}</dd><dt>Parties · victoires</dt><dd>${save.runs} · ${save.wins}</dd><dt>Germes éliminés</dt><dd>${(save.totalKills||0).toLocaleString('fr-FR')}</dd>`;
  renderDuo();
@@ -1445,7 +1440,7 @@ function renderEquip(){const it=equipped();const d=WEAPONS[it.id],R=RARITY[it.r]
  const owned=Object.keys(ownedMap()).length,all=Object.keys(WEAPONS).length;
  $('#btn-inv').innerHTML=`${svg('arsenal')}<span>Inventaire</span><small>${owned}/${all} armes</small>`;
  const L=$('#btn-lab');L.classList.toggle('hot',nb>0);
- L.innerHTML=`<span class="box-art">${boxArt()}</span><span class="lab-cta-txt"><b>LABO</b><small>${nb?'Des box t’attendent ! Ouvre-les pour de nouvelles armes.':'Box d’armes · talents permanents'}</small></span>
+ L.innerHTML=`<span class="box-art">${boxArt()}</span><span class="lab-cta-txt"><b>LABO</b><small>${nb?'Des box t’attendent !':'Box d’armes · talents'}</small></span>
   <span class="lab-cta-side"><span class="lab-cta-cores">${svg('core',2)}${save.cores}</span>${nb?`<span class="badge">${nb} box à ouvrir</span>`:'<span class="arrow">→</span>'}</span>`;}
 function renderInv(){const eq=equipped();
  $('#inv-grid').innerHTML=stacks().map(st=>{const d=WEAPONS[st.id],R=RARITY[st.r];const on=st.items.some(x=>x.u===eq.u);const n=st.items.length;
