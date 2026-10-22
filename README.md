@@ -7,7 +7,7 @@ Jeu d'arcade néon en un seul fichier HTML, publié avec GitHub Pages. Le corps 
 - Jouer : https://antoinecorcos.github.io/neonhorde/
 - Code : `index.html`
 
-Version actuelle : **0.7.4** (affichée en bas à droite du jeu).
+Version actuelle : **0.8** (affichée en bas à droite du jeu).
 
 ## Armes, raretés et box
 
@@ -18,11 +18,19 @@ Version actuelle : **0.7.4** (affichée en bas à droite du jeu).
 - En partie, seules les armes possédées apparaissent, avec la meilleure rareté possédée.
 - **1 seule arme à la fois** au départ ; le talent **Arsenal** du labo ajoute des emplacements (jusqu'à 4 armes : 120, 260 puis 450 noyaux).
 - Une partie abandonnée ne rapporte aucun noyau (les box trouvées sont conservées).
-- 14 armes, dont 4 nouvelles en 0.4 : Lance-flammes, Rayon cryo, Katana néon, Singularité.
+- 15 armes, dont Lance-flammes, Rayon cryo, Katana néon, Singularité (0.4) et Tourelle (0.8, évolution « Sentinelles » : tourelles volantes qui suivent le joueur).
 
 ## Boss
 
 Quatre boss au style néon, chacun avec ses attaques : **La Ruche** (renforts), **L'Œil** (spirales de projectiles), **Le Titan** (charges rapides, très résistant) et **La Couronne** (boss final).
+
+## Carrière (v0.8)
+
+- 25 niveaux répartis en 5 mondes (Épiderme, Plasma, Lymphe, Moelle, Cortex), chacun avec son fond néon.
+- Chaque niveau : 10 manches, boss aux manches 5 et 10. La difficulté monte doucement dans un niveau et de façon linéaire d'un niveau à l'autre.
+- Carte façon « chemin » : niveau suivant débloqué en cas de victoire, 1 à 3 étoiles selon les PV restants (40 % et 75 %).
+- Bonus de noyaux au premier passage et pour chaque nouvelle étoile ; Box Mutante sur le boss de fin de monde.
+- Le mode **Infini** reste disponible (le fond change tous les 10 vagues).
 
 ## Modes
 
