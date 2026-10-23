@@ -88,6 +88,7 @@ export function dmgEnemy(e, base, o = {}) {
   e.hp -= d;
   e.flash = 0.08;
   G.dmgDone += d;
+  if (P) P.dmgDone += d; // dégâts de chaque joueur (classement)
   if (o.kb) {
     const k = o.kb * e.kbRes;
     let ax = o.kx,
@@ -120,6 +121,7 @@ export function killEnemy(e, silent) {
     return;
   }
   G.kills++;
+  if (P) P.kills++;
   G.combo++;
   G.comboT = 2.2;
   if (G.combo > G.maxCombo) G.maxCombo = G.combo;
@@ -249,7 +251,7 @@ export function teamDown() {
 // Réanimation : un partenaire debout reste à côté du joueur à terre pendant 3 s
 export function updateRevive(dt) {
   for (const pl of G.players) {
-    if (!pl.down) continue;
+    if (!pl.down || pl.gone) continue;
     const near = G.players.some(o => o !== pl && !o.down && Math.hypot(o.x - pl.x, o.y - pl.y) < 70);
     if (near) {
       pl.rev += dt / 3;

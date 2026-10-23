@@ -1,0 +1,251 @@
+/* ---------- Duo en ligne (panneau du menu, partenaire dans le HUD) et classement ---------- */
+.duo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+}
+.duo-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.duo-row .btn {
+  flex: 0 0 auto;
+}
+.code-in {
+  flex: 1 1 110px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  font: 700 18px/1 var(--f-ui);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  background: rgba(12, 20, 40, 0.85);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  -webkit-user-select: text;
+  user-select: text;
+}
+.code-in:focus {
+  border-color: var(--cyan);
+  outline: none;
+}
+.code-big {
+  font-family: var(--f-display);
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  color: var(--mag);
+  text-shadow: 0 0 18px rgba(255, 61, 139, 0.5);
+  -webkit-user-select: text;
+  user-select: text;
+}
+.duo-names {
+  flex: 1 1 140px;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--dim);
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 6px;
+  row-gap: 2px;
+  align-items: baseline;
+}
+.duo-names .duo-status {
+  flex-basis: 100%;
+}
+.duo-names b {
+  color: var(--fg);
+  letter-spacing: 0.06em;
+}
+.duo-names b.me {
+  color: var(--cyan);
+}
+.duo-names small {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.duo-status {
+  font-size: 13px;
+  color: var(--dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.duo-status::before {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dim);
+}
+.duo-status.ok {
+  color: var(--green);
+}
+.duo-status.ok::before {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+.duo-status.err {
+  color: var(--red);
+}
+.duo-status.err::before {
+  background: var(--red);
+}
+.wait-msg {
+  grid-column: 1/-1;
+  margin: 0;
+  padding: 28px 16px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--dim);
+  border: 1px dashed var(--line);
+}
+.mate {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #ff6ad5;
+}
+.mate .hpbox {
+  width: min(110px, 22vw);
+  height: 9px;
+  border-color: #4a1f45;
+}
+.mate .hpfill {
+  background: linear-gradient(90deg, #ff6ad5, #ffa8ea);
+  box-shadow: 0 0 10px rgba(255, 106, 213, 0.6);
+}
+.mate.p1 {
+  color: #3ef2ff;
+}
+.mate.p1 .hpbox {
+  border-color: #1f3f5a;
+}
+.mate.p1 .hpfill {
+  background: linear-gradient(90deg, #3ef2ff, #a8f9ff);
+  box-shadow: 0 0 10px rgba(62, 242, 255, 0.6);
+}
+
+/* Classement */
+.rec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.rank-btn {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  border-color: rgba(255, 210, 62, 0.45);
+}
+.rank-box {
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.rank-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rank-tabs button {
+  padding: 8px 12px;
+  font: 600 13px/1 var(--f-ui);
+  letter-spacing: 0.06em;
+  color: var(--dim);
+  background: rgba(12, 20, 40, 0.75);
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+.rank-tabs button.on {
+  color: #06111c;
+  background: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px rgba(62, 242, 255, 0.4);
+}
+.rank-title {
+  margin: 0 0 10px;
+  font: 400 18px/1.2 var(--f-display);
+  letter-spacing: 0.04em;
+  color: var(--fg);
+}
+.rank-ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rank-ol li {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 2px solid transparent;
+}
+.rank-ol .rk {
+  font-family: var(--f-display);
+  color: var(--dim);
+  text-align: right;
+}
+.rank-ol .nm {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.rank-ol .vl {
+  font-weight: 700;
+  color: var(--fg);
+}
+.rank-ol li.p1 .rk {
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(255, 210, 62, 0.6);
+}
+.rank-ol li.p2 .rk {
+  color: #d9e4f5;
+}
+.rank-ol li.p3 .rk {
+  color: #e8975a;
+}
+.rank-ol li.me {
+  border-left-color: var(--cyan);
+  background: rgba(62, 242, 255, 0.1);
+}
+.rank-ol li.me .nm {
+  color: var(--cyan);
+}
+.rank-ol li.gap {
+  display: block;
+  padding: 0 10px;
+  background: none;
+  color: var(--dim);
+}
+.rank-empty,
+.rank-note {
+  margin: 6px 0 0;
+  color: var(--dim);
+  font-size: 14px;
+}
+.rank-empty.err {
+  color: var(--red);
+}

@@ -1,9 +1,10 @@
 // Déroulement de la partie : actions des joueurs, choix de niveau, boutique, pause, fin.
 
-import { shockwave } from './combat.js';
-import { sfx, textFx } from './fx.js';
+import { shockwave, teamDown } from './combat.js';
+import { banner, sfx, textFx } from './fx.js';
 import { hooks } from './hooks.js';
 import { applyOpt, candidates, optLabel, priceOf, rerollCost, rollOptions, rollShop, validOpt } from './options.js';
+import { alive, plName } from './player.js';
 import { G, P, withP } from './state.js';
 import { startWave } from './waves.js';
 import { clamp } from '../util.js';
@@ -41,9 +42,30 @@ export function doAct(pl, a, i) {
   }
 }
 
+// Duo : un joueur quitte la partie (abandon, ou connexion perdue plus de 30 s). L'autre continue seul.
+export function leaveGame(pl) {
+  if (!G || pl.gone) return;
+  pl.gone = true;
+  pl.down = true;
+  pl.hp = 0;
+  pl.vx = pl.vy = 0;
+  pl.pend = 0;
+  pl.ready = true;
+  pl.in = [0, 0];
+  if (G.state === 'over') return;
+  banner(plName(pl) + ' A QUITTÉ LA PARTIE', '', '#ff3d8b');
+  if (G.players.every(p => p.gone)) return gameOver(false, true);
+  // personne debout pour réanimer celui qui reste à terre : fin de la partie
+  if (!alive().length && (G.state === 'play' || G.state === 'clear')) return teamDown();
+  if (G.state === 'level' && !G.players.some(p => p.pend > 0)) levelDone();
+  else if (G.state === 'shop' && G.players.every(p => p.ready)) nextWave();
+  else hooks.refreshViews();
+}
+
 export function openLevel() {
   G.state = 'level';
   for (const pl of G.players) {
+    if (pl.gone) continue;
     pl.pend += G.pendingLevels;
     autoLevels(pl);
     if (pl.pend > 0) rollLevel(pl);
@@ -123,7 +145,7 @@ export function openShop() {
   G.state = 'shop';
   hooks.clearInput();
   for (const pl of G.players) {
-    if (pl.down) {
+    if (pl.down && !pl.gone) {
       pl.down = false;
       pl.rev = 0;
       pl.inv = 1;
@@ -133,7 +155,7 @@ export function openShop() {
     pl.shop.rerolls = 0;
     pl.shop.bought = [];
     pl.shop.free = pl.freeRerolls;
-    pl.ready = false;
+    pl.ready = pl.gone; // un joueur parti ne bloque pas la vague suivante
     withP(pl, rollShop);
   }
   hooks.refreshViews();
@@ -223,6 +245,12 @@ export function gameOver(win, quit) {
     duo: G.players.length > 1,
     boxes: G.boxes,
     quit: !!quit,
+    players: G.players.map(p => ({
+      kills: p.kills,
+      dmg: Math.round(p.dmgDone),
+      hp: clamp(p.hp / p.maxHp, 0, 1),
+      gone: p.gone,
+    })),
   };
   hooks.gameOver(d);
 }

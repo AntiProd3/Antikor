@@ -6,6 +6,7 @@ import { account, hasToken, login, on, register, resumeSession } from '../online
 import { G } from '../sim/state.js';
 import { refreshMeta } from './boxes.js';
 import { $, hideNotice, notice, show } from './dom.js';
+import { resumeDuoGame } from './duo.js';
 import { renderMenu } from './menu.js';
 
 function status(text, kind = '') {
@@ -30,6 +31,8 @@ function enterMenu() {
   hideNotice();
   renderMenu();
   show('scr-menu');
+  // page rechargée pendant une partie en duo : on la reprend (elle attend le joueur 30 s)
+  resumeDuoGame();
 }
 
 async function submit(kind) {

@@ -150,31 +150,25 @@ export function updateCosmetics(dt, rdt) {
   compact(G.decals);
 }
 
+// Déplacement d'un joueur selon sa commande [x, y] (aussi utilisé par le jeu en duo pour anticiper son propre vaisseau)
+export function movePlayer(pl, [ix, iy], dt) {
+  const tx = ix * pl.speed,
+    ty = iy * pl.speed;
+  const k = Math.min(1, dt * 14);
+  pl.vx += (tx - pl.vx) * k;
+  pl.vy += (ty - pl.vy) * k;
+  pl.x += pl.vx * dt;
+  pl.y += pl.vy * dt;
+  pl.moving = Math.hypot(ix, iy) > 0.1;
+}
+
 export function updatePlayer(pl, dt) {
   if (G.state === 'dying' || pl.down) {
     pl.vx = pl.vy = 0;
     pl.moving = false;
     return;
   }
-  if (pl.i === ME) {
-    const [ix, iy] = pl.in || [0, 0];
-    const tx = ix * pl.speed,
-      ty = iy * pl.speed;
-    const k = Math.min(1, dt * 14);
-    pl.vx += (tx - pl.vx) * k;
-    pl.vy += (ty - pl.vy) * k;
-    pl.x += pl.vx * dt;
-    pl.y += pl.vy * dt;
-    pl.moving = Math.hypot(ix, iy) > 0.1;
-  } else if (pl.nx !== undefined) {
-    // joueur distant : il annonce lui-même sa position, on la suit en douceur
-    const k = Math.min(1, dt * 18);
-    pl.x += (pl.nx - pl.x) * k;
-    pl.y += (pl.ny - pl.y) * k;
-    pl.vx = pl.nvx;
-    pl.vy = pl.nvy;
-    pl.moving = pl.nm;
-  }
+  movePlayer(pl, pl.in || [0, 0], dt);
   if (pl.moving) pl.step += dt * 14;
   if (pl.inv > 0) pl.inv -= dt;
   if (pl.regen && G.state === 'play') pl.hp = Math.min(pl.maxHp, pl.hp + pl.regen * dt);

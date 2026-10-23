@@ -170,7 +170,7 @@ export function initDemo() {
 // Flèche au bord de l'écran quand le partenaire est hors champ
 export function drawMateArrow() {
   const m = G.players[1 - ME];
-  if (!m || G.state === 'over') return;
+  if (!m || m.gone || G.state === 'over') return;
   const cam = G.cam;
   const dx = m.x - cam.x,
     dy = m.y - cam.y;

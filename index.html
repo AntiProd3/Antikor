@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="css/collection.css">
 <link rel="stylesheet" href="css/map.css">
 <link rel="stylesheet" href="css/tooltips.css">
+<link rel="stylesheet" href="css/duo.css">
 <link rel="stylesheet" href="css/screens.css">
 <link rel="stylesheet" href="css/hud.css">
 </head>
@@ -77,6 +78,7 @@
       <h1 class="logo"><span class="l1">ANTI</span><span class="l2">KOR</span></h1>
       <p class="tagline">Tiens jusqu’à la dernière vague. Ouvre des box, collectionne les armes rares et fais évoluer ton arsenal.</p>
       <div class="group"><div class="eyebrow">Joueurs</div><div class="seg two" id="players-seg"></div></div>
+      <div class="panel cut duo" id="duo-panel" hidden></div>
       <div class="group"><div class="eyebrow">Mode</div><div class="seg two" id="mode-seg"></div></div>
       <div class="group"><div class="eyebrow">Arme équipée</div><div class="equip"><div id="equip-card"></div><button class="btn cut inv-btn" id="btn-inv"></button></div></div>
       <div class="play-row"><button class="btn btn-primary cut" id="btn-play">JOUER</button><kbd>Entrée</kbd></div>
@@ -84,7 +86,7 @@
     <div class="side">
       <button class="lab-cta cut" id="btn-lab"></button>
       <div class="panel cut">
-        <div class="eyebrow" style="margin-bottom:10px">Records · <b class="acc-name" id="acc-name"></b></div>
+        <div class="rec-head"><div class="eyebrow">Records · <b class="acc-name" id="acc-name"></b></div><button class="btn cut rank-btn" id="btn-rank">Classement</button></div>
         <dl class="kv" id="menu-records"></dl>
       </div>
       <div class="panel cut">
@@ -182,6 +184,18 @@
     <div class="map-inner" id="map-inner"></div>
   </div>
   <div class="map-pop" id="map-pop" hidden></div>
+</div>
+
+<!-- CLASSEMENT -->
+<div class="screen" id="scr-rank" hidden>
+  <div class="box rank-box">
+    <div class="lab-head">
+      <div><div class="eyebrow">Tous les joueurs · top 15</div><h2 class="h2">Classement</h2></div>
+      <button class="btn cut" id="btn-rank-back">Retour</button>
+    </div>
+    <div class="rank-tabs" id="rank-tabs" role="tablist"></div>
+    <div class="panel cut rank-list" id="rank-list"></div>
+  </div>
 </div>
 
 <!-- OVER -->

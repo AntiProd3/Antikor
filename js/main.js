@@ -10,7 +10,9 @@ import { G, ME, P, settings } from './sim/state.js';
 import { update } from './sim/update.js';
 import { initBoxes } from './ui/boxes.js';
 import { chooseLevel, initCards } from './ui/cards.js';
-import { $ } from './ui/dom.js';
+import { $, currentScreen } from './ui/dom.js';
+import { duoScreens, initDuoUi } from './ui/duo.js';
+import { duoUpdate, initDuo } from './online/duo.js';
 import { act, initGame, startGame } from './ui/game.js';
 import { initHud, updateHUD } from './ui/hud.js';
 import { initInventory } from './ui/inventory.js';
@@ -19,10 +21,16 @@ import { initLab } from './ui/lab.js';
 import { initLogin } from './ui/login.js';
 import { initMap } from './ui/map.js';
 import { initMenu } from './ui/menu.js';
+import { initRank } from './ui/rank.js';
 import { initTooltips } from './ui/tooltips.js';
 
 // Une étape de simulation (aussi utilisée par les tests) : la commande du joueur local, puis la partie avance.
 function stepGame(rdt) {
+  if (G && G.online) {
+    duoUpdate(rdt, currentScreen() === 'scr-pause');
+    duoScreens();
+    return;
+  }
   if (G && (G.state === 'play' || G.state === 'clear' || G.state === 'dying')) {
     G.players[ME].in = inputVec();
     if (G.hitstop > 0) {
@@ -67,6 +75,9 @@ initHud();
 initKeyboard();
 initInput();
 initTooltips();
+initDuo();
+initDuoUi();
+initRank();
 addEventListener('resize', resize);
 resize();
 initFloor();

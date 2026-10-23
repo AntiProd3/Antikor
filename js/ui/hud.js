@@ -71,7 +71,7 @@ export function updateHUD() {
   if (mate) {
     hs('h-matel', plName(mate));
     hs('h-matef', clamp(mate.hp / mate.maxHp, 0, 1).toFixed(3), 'sx');
-    hs('h-mates', mate.down ? 'À TERRE' : '');
+    hs('h-mates', mate.gone ? 'PARTI' : mate.away ? 'DÉCONNECTÉ' : mate.down ? 'À TERRE' : '');
     const mc = 'mate' + (mate.i === 0 ? ' p1' : '');
     if (hudCache.mc !== mc) {
       hudCache.mc = mc;

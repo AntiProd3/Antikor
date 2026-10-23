@@ -23,6 +23,8 @@ export function newProgress() {
     runs: 0,
     wins: 0,
     totalKills: 0,
+    // pour le classement : dégâts cumulés, meilleur niveau de héros et meilleur combo en une partie
+    stats: { dmg: 0, maxLevel: 0, maxCombo: 0 },
   };
 }
 
@@ -149,7 +151,7 @@ export function openBox(prog, kind, buy, rnd) {
 // ---------- Fin de partie ----------
 
 // d = résultat de la partie (déjà vérifié par le serveur) : win, quit, mode, cl (niveau de carrière), hp (0 à 1),
-// wave, kills, bossKills, boxes {std, prem}. Met à jour la progression et renvoie les récompenses.
+// wave, kills, bossKills, boxes {std, prem}, dmg, level (héros), maxCombo. Met à jour la progression et renvoie les récompenses.
 export function runRewards(prog, d) {
   const career = d.mode === 'career';
   const waves = d.win ? d.wave : d.wave - 1;
@@ -165,7 +167,8 @@ export function runRewards(prog, d) {
       bonus += (stars - prev) * 5;
       prog.career.stars[d.cl] = stars;
     }
-    if (d.cl >= prog.career.max && d.cl < CAREER_LEVELS) {
+    // en duo, le partenaire peut jouer un niveau qu'il n'a pas encore débloqué : il ne saute pas de niveau pour autant
+    if (d.cl === prog.career.max && d.cl < CAREER_LEVELS) {
       prog.career.max = d.cl + 1;
       unlocked = true;
     }
@@ -174,6 +177,10 @@ export function runRewards(prog, d) {
   cores = d.quit ? 0 : Math.max(1, cores);
   prog.cores += cores;
   prog.totalKills += d.kills;
+  const st = (prog.stats = Object.assign({ dmg: 0, maxLevel: 0, maxCombo: 0 }, prog.stats));
+  st.dmg += Math.max(0, Math.round(d.dmg) || 0);
+  st.maxLevel = Math.max(st.maxLevel, d.level | 0);
+  st.maxCombo = Math.max(st.maxCombo, d.maxCombo | 0);
   if (d.win) prog.wins++;
   const best = prog.best[d.mode] || 0;
   const newRec = !career && d.wave > best;

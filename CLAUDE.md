@@ -8,7 +8,7 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
 - Le jeu s'appelait **« Néon Horde »** jusqu'à la v0.7. Il a été renommé parce qu'un jeu Steam porte ce nom.
 - **Le jeu est découpé en modules ES** depuis la v0.8.2 : `index.html` (le squelette HTML des écrans), `css/` et `js/`. Aucune dépendance, aucune étape de construction : GitHub Pages sert les fichiers tels quels. Avant, tout tenait dans un seul `index.html` de 2 200 lignes.
 - **Langue :** l'interface, les commentaires du code et les échanges avec l'utilisateur sont en **français**. Les messages de commit sont en anglais.
-- **Version actuelle : 0.9.0.** Elle est affichée en bas à droite du jeu (`VERSION` dans `js/config.js`).
+- **Version actuelle : 0.10.0.** Elle est affichée en bas à droite du jeu (`VERSION` dans `js/config.js`).
 - **Un compte est obligatoire pour jouer** depuis la v0.9 : la progression (noyaux, armes, talents, box, carrière, records) est gardée sur le serveur **AntiBack** (dépôt privé `Antoinecorcos/AntiBack`, Raspberry Pi de Tibo, https://rpi5.tail085c70.ts.net). Elle suit le joueur sur tous ses appareils ; plusieurs appareils peuvent être connectés en même temps. Les sauvegardes locales d'avant la v0.9 ne sont pas reprises (décision des utilisateurs : les comptes partent de zéro).
 
 ## Dépôt et publication
@@ -38,17 +38,18 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
 - Il aime le style **néon sobre**, le côté **addictif** (box, raretés, étoiles, carte de niveaux) et la **vibe biologique**.
 - Réponses attendues en français, claires, sans jargon. On résume ce qui a changé et ce qui a été testé.
 
-## Fonctionnalités actuelles (v0.9.0)
+## Fonctionnalités actuelles (v0.10.0)
 
 ### Compte
 - Au lancement, **écran de connexion** (`#scr-login`, `js/ui/login.js`) : pseudo (3 à 16 caractères) et mot de passe (8 minimum), « Se connecter » ou « Créer un compte ». Le jeton de session est gardé dans le navigateur (`antikor-token`, 7 jours) : au prochain lancement la session reprend toute seule. Si le serveur est injoignable : message et bouton « Réessayer ».
-- Dans le menu : le pseudo à côté de « Records » et un bouton « Se déconnecter » à côté du son.
+- Dans le menu : le pseudo à côté de « Records », un bouton « Classement » et un bouton « Se déconnecter » à côté du son.
+- **Classement** (`#scr-rank`, `js/ui/rank.js`, v0.10) : top 15 de tous les joueurs pour 9 statistiques (onglets) : meilleure manche en Infini, étoiles, niveaux de carrière terminés, éliminations, dégâts, meilleur niveau du héros, meilleur combo, victoires, parties. Sa propre place s'affiche en dessous si on n'est pas dans le top. Calculé par le serveur (requête `leaderboard`) à partir de la progression de chaque compte ; dégâts, niveau du héros et combo sont dans `prog.stats` depuis la v0.10 (les parties d'avant ne comptent pas).
 - Connexion perdue : message discret en haut (« Connexion au serveur perdue · reconnexion… »), reconnexion automatique ; une fin de partie est renvoyée dès que le serveur revient.
 
 ### Menu
 - Logo **ANTIKOR** sur une ligne : « ANTI » en cyan, « KOR » en rose néon qui clignote. Sa taille suit la colonne (unités `cqi`).
 - Description : « Tiens jusqu'à la dernière vague. Ouvre des box, collectionne les armes rares et fais évoluer ton arsenal. » L'utilisateur a refusé la version « Le corps est envahi… ».
-- **Joueurs :** Solo / Duo en ligne. Le duo est **grisé** (« Bientôt, via le serveur ») : l'ancien duo PeerJS a été supprimé en v0.9, le nouveau passera par le serveur (phase 3).
+- **Joueurs :** Solo / Duo en ligne. En duo, un panneau apparaît sous le choix : « Créer une salle » ou un code à saisir puis « Rejoindre » ; dans une salle, le code (rose), les deux pseudos (l'hôte est marqué) et « Quitter ». Seul l'hôte lance (le JOUER du partenaire est grisé).
 - **Mode :** Carrière / Infini.
 - **Arme équipée** (carte avec la rareté) et bouton **Inventaire**.
 - Gros bouton **JOUER**. En Carrière, il ouvre la carte.
@@ -124,6 +125,14 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
   - talents : effet actuel et suivant, coût, explication ;
   - monnaies (les box n'ont plus d'infobulle depuis la v0.8.3).
 
+### Duo en ligne (v0.10, phase 3 d'AntiBack)
+- **La partie tourne sur le serveur** (un worker par partie, qui importe `js/sim/` de ce dépôt sans modification). Le jeu envoie seulement ses commandes : direction du joystick (`duo_in`, numérotée, 30 par seconde au plus) et actions (`duo_act` : carte, achat, relance, verrou, prêt, abandon). Le serveur envoie 20 instantanés par seconde (`js/sim/snapshot.js`, format partagé), les écrans de niveau/boutique de chaque joueur (`duo_view`, données de `js/sim/views.js`), ses sons et notifications (`duo_say`, `duo_toast`), et la fin (`duo_over` avec les récompenses de chacun).
+- `js/online/duo.js` : salle (`duo.room`), début (`duo_begin`), affichage des instantanés (interpolation des autres objets), **anticipation de son propre vaisseau** (il avance tout de suite ; quand un instantané arrive, l'écart avec la position calculée par le serveur au même moment est corrigé en douceur, grâce au numéro de commande `q` et au temps `qt` renvoyés par le serveur). `js/ui/duo.js` : panneau du menu et écrans de la partie.
+- Chacun joue avec la progression de son compte (talents, armes) ; récompenses de chacun avec ses propres éliminations, dégâts et PV ; les box trouvées sont données aux deux. En Carrière, le niveau doit être débloqué par l'hôte ; le partenaire ne débloque le niveau suivant que s'il était à ce niveau.
+- **Pas de pause en duo** : le menu pause s'affiche mais la partie continue ; changer de fenêtre ne met pas en pause.
+- **Connexion perdue** : la partie s'arrête et attend le joueur **30 s** (message chez l'autre). Il revient tout seul (reconnexion automatique, ou page rechargée : la partie est retenue dans `sessionStorage`, clé `antikor-duo`). Au-delà, il est considéré comme parti et l'autre continue seul. Abandonner (menu pause) = partir : aucun noyau, box gardées.
+- Un joueur parti (`pl.gone`) est retiré de la partie (`leaveGame()` dans `js/sim/flow.js`) ; s'il ne reste personne debout, la partie se termine.
+
 ### Progression sur le serveur (v0.9)
 - Le serveur fait foi : le jeu affiche la progression reçue (`prog` dans `js/online/client.js`) et **demande chaque changement** au serveur : achat de talent (`talent_buy`), ouverture ou achat de box (`box_open`, l'arme est **tirée par le serveur**), équiper (`equip`), fusion (`fuse`).
 - **Partie solo :** elle tourne toujours dans le navigateur. Au lancement, `run_start` donne un ticket et le joueur à créer (talents, armes, arme équipée, d'après le compte). À la fin, `run_end` envoie le résultat ; le serveur vérifie qu'il est possible (durée réelle, vagues complètes de 30 s, boss, box, éliminations) puis calcule les récompenses avec les mêmes règles (`runRewards`). Un résultat impossible est refusé (« Résultat refusé par le serveur »).
@@ -136,7 +145,7 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
 Chaque fichier commence par une ligne qui dit ce qu'il contient. Les imports en tête de fichier indiquent d'où vient chaque fonction.
 
 - `index.html` : le HTML de tous les écrans, les feuilles de style, puis `<script type="module" src="js/main.js">`.
-- `css/` : les styles, chargés **dans cet ordre** (l'ordre compte pour la cascade) : `base`, `menu` (+ connexion et message `notice`), `collection` (raretés, inventaire, box, bouton labo), `map`, `tooltips`, `screens` (cartes, boutique, labo, fin), `hud` (+ bannière).
+- `css/` : les styles, chargés **dans cet ordre** (l'ordre compte pour la cascade) : `base`, `menu` (+ connexion et message `notice`), `collection` (raretés, inventaire, box, bouton labo), `map`, `tooltips`, `duo` (panneau duo, partenaire dans le HUD, classement), `screens` (cartes, boutique, labo, fin), `hud` (+ bannière).
 - `js/main.js` : démarrage (`init…()` de chaque module) et boucle `frame()`.
 - `js/data/` : **les réglages du jeu, sans code** ; c'est là qu'on équilibre.
   - `weapons.js` : les 15 armes (textes, `stats(niveau)`, évolution) ;
@@ -145,22 +154,24 @@ Chaque fichier commence par une ligne qui dit ce qu'il contient. Les imports en 
   - `state.js` : `G`, `P`, `ME`, `WM`, `view` (demi-taille visible `hw`/`hh`), `settings`. Les autres modules lisent ces variables directement mais les modifient **uniquement avec `setG`, `setP`, `setME`, `setWM`, `setView`** (règle des modules ES) ;
   - `hooks.js` : ce que la simulation demande à l'interface (son, bannière, notification, écran, fin de partie…). Le client les remplit dans `js/ui/game.js` (`initGame`) ; sous Node elles restent vides ;
   - `update.js` (une image), `weapons.js` (comportement des armes, `this` = l'arme de `data/weapons.js`), `combat.js`, `enemies.js`, `projectiles.js`, `pickups.js`, `spawn.js` (difficulté `progress()`/`computeScale()`, apparitions, événements), `boss.js`, `waves.js` (`newRun`, `startWave`, `endWave`), `options.js` (cartes de niveau/coffre/boutique et prix), `flow.js` (actions `doAct`, montée de niveau, boutique, pause, `gameOver`), `fx.js` (effets et `sfx()`, enregistrés par `rec()` pour le duo), `grid.js`, `player.js` ;
-  - la commande de chaque joueur arrive dans `pl.in = [x, y]`, remplie par `main.js` (`stepGame`) à partir de `inputVec()`.
+  - `views.js` (contenu des écrans de niveau et de boutique d'un joueur, sous forme de données : mis en forme par `ui/cards.js` en solo, envoyé par le serveur en duo), `snapshot.js` (instantané de la partie pour le duo) ;
+  - la commande de chaque joueur arrive dans `pl.in = [x, y]`, remplie par `main.js` (`stepGame`) à partir de `inputVec()` en solo, par le serveur en duo. `movePlayer()` (`update.js`) déplace un joueur selon sa commande ;
+  - chaque joueur compte ses éliminations et dégâts (`pl.kills`, `pl.dmgDone`) ; `pl.name` (pseudo), `pl.gone` (parti), `pl.away` (connexion perdue).
 - `js/render/` : le dessin sur le canvas. `render.js` (image complète, démo du menu), `world.js` (tout ce qui est dans le monde), `floor.js` (sols des mondes), `canvas.js` (taille, `ZOOM`, `HW`/`HH`), `sprites.js` (dessins des monstres, créés par `initSprites()`).
-- `js/ui/` : les écrans HTML. `login.js` (connexion, reconnexion), `game.js` (lancer une partie avec `run_start`, `act()`, branchement des hooks), `menu.js`, `map.js`, `lab.js`, `boxes.js`, `inventory.js`, `cards.js` (écrans de niveau et de boutique), `over.js` (fin de partie : statistiques tout de suite, récompenses envoyées par le serveur après `run_end`), `hud.js`, `tooltips.js`, `keyboard.js`, `dom.js` (`$`, `show`, `notice()` pour les messages hors partie, notifications).
+- `js/ui/` : les écrans HTML. `login.js` (connexion, reconnexion), `game.js` (lancer une partie avec `run_start`, `act()`, branchement des hooks), `menu.js`, `map.js`, `lab.js`, `boxes.js`, `inventory.js`, `cards.js` (écrans de niveau et de boutique, `showLevel`/`showShop` à partir des données de `sim/views.js`), `over.js` (fin de partie : statistiques tout de suite, récompenses envoyées par le serveur après `run_end`, ou directement avec `duo_over`), `duo.js` (panneau duo du menu, écrans d'une partie en duo), `rank.js` (classement), `hud.js`, `tooltips.js`, `keyboard.js`, `dom.js` (`$`, `show`, `notice()` pour les messages hors partie, notifications).
 - `js/rules.js` : **règles de la progression, partagées avec le serveur** (`newProgress`, `talentCost`/`talentGate`/`buyTalent`, `talentStats`, `playerSpec`, `openBox`/`rollBox`, `equip`, `fuse`, `runRewards`). Aucune dépendance à la page.
-- `js/online/client.js` : connexion au serveur (WebSocket, protocole 2) : `login`/`register`/`resumeSession`/`logout`, `request(type, données)` (réponse `{ok, …}`), progression `prog` et pseudo `account`, événements `on('state' | 'status' | 'logout')`, reconnexion automatique. `?server=ws://127.0.0.1:PORT/ws` permet de viser un serveur local (seulement localhost).
+- `js/online/client.js` : connexion au serveur (WebSocket, protocole 3) : `login`/`register`/`resumeSession`/`logout`, `request(type, données)` (réponse `{ok, …}`), `post(type, données)` (sans réponse : commandes du duo), progression `prog` et pseudo `account`, événements `on('state' | 'status' | 'logout')`, reconnexion automatique. `?server=ws://127.0.0.1:PORT/ws` permet de viser un serveur local (seulement localhost).
 - `js/save.js` (réglages de l'appareil : mode, son ; clé `antikor-settings`), `js/meta.js` (lecture de `prog` avec les règles : talents, armes possédées, arme équipée), `js/audio.js` (sons), `js/input.js` (clavier, joystick), `js/icons.js` (icônes SVG), `js/util.js`, `js/config.js` (`VERSION`, `SERVER_URL`).
 - Les deux fichiers de dessins (`js/icons.js`, `js/render/sprites.js`) restent volontairement compacts ; inutile de les lire pour comprendre le jeu.
 
 ### Points clés
 
-- **Écrans** (`.screen`, affichés avec `show(id)`) : `scr-login`, `scr-menu`, `scr-lab`, `scr-inv`, `scr-map`, `scr-level`, `scr-shop`, `scr-pause`, `scr-over`. Plus le calque `#box-open` et `#map-pop`.
+- **Écrans** (`.screen`, affichés avec `show(id)`) : `scr-login`, `scr-menu`, `scr-rank`, `scr-lab`, `scr-inv`, `scr-map`, `scr-level`, `scr-shop`, `scr-pause`, `scr-over`. Plus le calque `#box-open` et `#map-pop`.
 - **CSS :** variables de couleur dans `:root` (`css/base.css` : `--cyan`, `--mag`, `--gold`, `--core`…). Coins coupés avec la classe `.cut`, polices Bungee (titres) et Chakra Petch (texte).
 - **État :** `G` la partie, `G.players` les joueurs, `P` le joueur « courant » (utilisé par le code des armes, changé avec `withP()`), `ME` l'index du joueur local, `WM` le multiplicateur de dégâts de la rareté pendant la mise à jour d'une arme.
-- **Progression** (`prog`, reçue du serveur, ne jamais la modifier côté jeu) : `cores`, `talents`, `inv` (`[{u,id,r}]`), `equip`, `uid`, `boxes {std,prem}`, `career {max,stars}`, `best`, `runs`, `wins`, `totalKills`. **Réglages locaux** (`save`, `persist()`) : `mode`, `muted`.
-- **Boucle :** `frame()` → `stepGame()` → `update()` (simulation) → `render()` → `updateHUD()`.
-- **Pour le futur serveur** (phase 0 du bilan serveur, faite en v0.8.2) : la simulation n'a plus de lien avec la page, les sprites sont créés dans `initSprites()`, la sauvegarde est sortie de `newRun`, et `tests/sim-bench.mjs` fait tourner une partie sous Node. Reste à faire côté serveur : fixer `view` avec `setView()` (aujourd'hui la taille de l'écran du joueur), et transformer en identifiants les quelques références directes entre objets (cible des roquettes `b.tg`, cibles du cryo `w.tgs`, `G.boss`).
+- **Progression** (`prog`, reçue du serveur, ne jamais la modifier côté jeu) : `cores`, `talents`, `inv` (`[{u,id,r}]`), `equip`, `uid`, `boxes {std,prem}`, `career {max,stars}`, `best`, `runs`, `wins`, `totalKills`, `stats {dmg, maxLevel, maxCombo}`. **Réglages locaux** (`save`, `persist()`) : `mode`, `muted`.
+- **Boucle :** `frame()` → `stepGame()` → `update()` (simulation ; en duo `duoUpdate()` à la place) → `render()` → `updateHUD()`. En duo, `G.online` est vrai et `act()` envoie les actions au serveur.
+- **Pour le futur serveur** (phase 0 du bilan serveur, faite en v0.8.2) : la simulation n'a plus de lien avec la page, les sprites sont créés dans `initSprites()`, la sauvegarde est sortie de `newRun`, et `tests/sim-bench.mjs` fait tourner une partie sous Node. Le serveur fixe `view` avec `setView(560, 340)` ; les références directes entre objets (`b.tg`, `w.tgs`, `G.boss`) restent dans le worker et ne sont jamais envoyées.
 - **Débogage :** `window.__AK` expose `G`, `P`, `startGame`, `act`, `chooseLevel`, `keys` et `tick(dt)` (une étape de simulation, pour les tests).
 
 ## Méthode de travail
@@ -189,13 +200,14 @@ Chaque fichier commence par une ligne qui dit ce qu'il contient. Les imports en 
 - **0.8 :** mode Carrière (25 niveaux, carte, étoiles), 5 fonds de monde, Tourelle et Servomoteur.
 - **0.8.1 :** carte en pleine largeur sur PC, « ? » sur les box, Arsenal lié aux mondes, joystick fixe.
 - **0.9.0 :** **comptes obligatoires** et progression sur le serveur AntiBack (écran de connexion, plusieurs appareils, reconnexion automatique, box tirées et récompenses calculées par le serveur, résultats de partie vérifiés), règles partagées dans `js/rules.js`, ancien duo PeerJS supprimé.
+- **0.10.0 :** **duo en ligne par le serveur** (salle avec code, l'hôte lance, Carrière et Infini, partie calculée par le serveur, anticipation du déplacement, attente de 30 s en cas de coupure, reprise après rechargement) et **classement** (top 15, 9 statistiques). Protocole 3.
 - **0.8.3 :** fin de partie sans cartes « Bourse »/« Soin » (soin automatique quand tout est au maximum), plus d'infobulle sur les box, la relance de la boutique ne repropose pas l'achat qui vient d'être fait, +15 % d'XP par niveau.
 - **0.8.2 :** réorganisation du code sans changement de jeu : découpage en modules (`css/`, `js/data`, `js/sim`, `js/render`, `js/ui`, `js/net`), simulation séparée de la page (phase 0 du bilan serveur), test Node `tests/sim-bench.mjs`, chemin de l'icône iOS corrigé.
 
 ## Pistes en attente
 
-- **Duo par le serveur** (phase 3 d'AntiBack) : le Pi fait tourner la partie, les joueurs envoient leurs commandes. Décisions prises : Carrière et Infini jouables à deux, attente de 30 s si un joueur perd la connexion, pas de pause en duo (le menu pause reste accessible).
-- **Classement** des parties (phase 6).
+- **Fluidité du duo** (phase 4) : à mesurer en vrai sur le Pi (débit de Funnel avec beaucoup d'ennemis) ; pistes : instantanés des ennemis moins fréquents, format binaire.
+- **Difficulté du duo** : les ennemis ne sont pas plus nombreux ni plus résistants à deux (comme l'ancien duo) ; à ajuster selon les retours.
 - **Équilibrage :** les chiffres de difficulté de la carrière, des prix et des chances des box sont un premier réglage, à ajuster selon les retours.
 - Idées proposées mais pas encore validées :
   - box quotidienne ;

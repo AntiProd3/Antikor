@@ -40,7 +40,7 @@ export function showOver(d) {
   const st = [
     ['Vague atteinte', M.endless ? d.wave : `${d.wave} / ${M.waves}`],
     ['Temps', fmtTime(d.time)],
-    ['Éliminations', d.kills],
+    ['Éliminations', d.kills + (d.duo ? ` · équipe ${d.teamKills}` : '')],
     ['Meilleur combo', d.maxCombo],
     ['Dégâts infligés', d.dmg.toLocaleString('fr-FR')],
     ['Niveau du héros', d.level],
@@ -58,9 +58,9 @@ export function showOver(d) {
   reward.innerHTML = `<span class="over-wait">Enregistrement de la partie…</span>`;
   const again = $('#btn-again');
   again.disabled = false;
-  again.textContent = career && !d.win ? 'Réessayer' : 'Rejouer';
+  again.textContent = d.duo ? 'Retour à la salle' : career && !d.win ? 'Réessayer' : 'Rejouer';
   const nx = $('#btn-nextlv');
-  nx.hidden = !(won && d.cl < CAREER_LEVELS);
+  nx.hidden = !(won && d.cl < CAREER_LEVELS) || !!d.duo;
   nx.className = 'btn btn-gold cut';
   again.className = nx.hidden ? 'btn btn-gold cut' : 'btn cut';
   $('#btn-menu').textContent = career ? 'Carte' : 'Menu';
@@ -68,20 +68,7 @@ export function showOver(d) {
   $('#hud').hidden = true;
   show('scr-over');
 
-  const res = {
-    win: !!d.win,
-    quit: !!d.quit,
-    wave: d.wave,
-    kills: d.kills,
-    bossKills: d.bossKills,
-    time: Math.round(d.time * 10) / 10,
-    hp: Math.round(d.hp * 1000) / 1000,
-    level: d.level,
-    boxes: { std: d.boxes.std | 0, prem: d.boxes.prem | 0 },
-  };
-  // renvoyée après une coupure : le serveur ne compte une partie qu'une fois
-  request('run_end', { run: d.run, res }, { retry: true, timeout: 120000 }).then(r => {
-    if (seq !== overSeq) return;
+  const showRewards = r => {
     if (!r.ok) {
       reward.innerHTML = `<span class="over-wait err">Récompenses non enregistrées : ${esc(r.msg || r.code)}</span>`;
       return;
@@ -97,5 +84,25 @@ export function showOver(d) {
       (r.boxes.prem
         ? ` <span class="rw-box" style="--c:${BOXES.prem.col}">${svg('box', 2)}+${r.boxes.prem} ${BOXES.prem.name}</span>`
         : '');
+  };
+  // duo : la partie a tourné sur le serveur, qui envoie directement les récompenses
+  if (d.rewards) return showRewards(d.rewards);
+
+  const res = {
+    win: !!d.win,
+    quit: !!d.quit,
+    wave: d.wave,
+    kills: d.kills,
+    bossKills: d.bossKills,
+    time: Math.round(d.time * 10) / 10,
+    hp: Math.round(d.hp * 1000) / 1000,
+    level: d.level,
+    dmg: d.dmg,
+    maxCombo: d.maxCombo,
+    boxes: { std: d.boxes.std | 0, prem: d.boxes.prem | 0 },
+  };
+  // renvoyée après une coupure : le serveur ne compte une partie qu'une fois
+  request('run_end', { run: d.run, res }, { retry: true, timeout: 120000 }).then(r => {
+    if (seq === overSeq) showRewards(r);
   });
 }

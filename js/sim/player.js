@@ -40,6 +40,11 @@ export function mkPlayer(i, spec) {
     freeRerolls: ts.freeRerolls,
     shop: { offers: [], rerolls: 0, free: 0, bought: [] },
     pend: 0,
+    name: spec.name || '', // pseudo du compte (duo)
+    kills: 0, // éliminations faites par ce joueur
+    dmgDone: 0,
+    gone: false, // a quitté la partie (duo)
+    away: false, // connexion perdue, la partie l'attend 30 s (duo)
     rid: 0,
     curOpts: null,
     ready: false,
@@ -110,7 +115,7 @@ export function focusPl() {
 }
 
 export function plName(pl) {
-  return 'J' + (pl.i + 1);
+  return pl.name ? pl.name.toUpperCase() : 'J' + (pl.i + 1);
 }
 
 export function owner(o) {

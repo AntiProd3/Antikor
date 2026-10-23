@@ -4,6 +4,7 @@ import { Sfx } from '../audio.js';
 import { CAREER_LEVELS } from '../data/career.js';
 import { clearInput } from '../input.js';
 import { prog, request } from '../online/client.js';
+import { duo, duoAct, startDuo } from '../online/duo.js';
 import { save } from '../save.js';
 import { doAct } from '../sim/flow.js';
 import { EV, setRec } from '../sim/fx.js';
@@ -12,6 +13,7 @@ import { G, ME, setG, setME, setP } from '../sim/state.js';
 import { newRun } from '../sim/waves.js';
 import { refreshViews, resetLevelView, say, toastFor } from './cards.js';
 import { $, bannerRaw, notice, show, toastRaw, toggleMute } from './dom.js';
+import { duoPause, duoResume } from './duo.js';
 import { resetHud } from './hud.js';
 import { renderLab } from './lab.js';
 import { openMap } from './map.js';
@@ -19,10 +21,18 @@ import { renderMenu } from './menu.js';
 import { showOver } from './over.js';
 import { clamp } from '../util.js';
 
-// Toute action du joueur passe par act() (en duo, elle partira vers le serveur)
+// Toute action du joueur passe par act() : appliquée ici en solo, envoyée au serveur en duo.
+// En duo, la pause n'arrête pas la partie : seul le menu s'affiche.
 export function act(a, i) {
   if (!G) return;
-  doAct(G.players[ME], a, i);
+  if (!G.online) return doAct(G.players[ME], a, i);
+  if (a === 'pause') {
+    if (G.state !== 'over') duoPause();
+  } else if (a === 'resume') duoResume();
+  else {
+    if (a === 'quit') show(null);
+    duoAct(a, i);
+  }
 }
 
 // curLevel = niveau de carrière joué (choisi sur la carte)
@@ -46,6 +56,7 @@ export async function startGame(lv) {
   if (starting) return;
   Sfx.init();
   Sfx.resume();
+  if (duo.on) return startDuoGame(lv);
   if (save.mode === 'career') {
     if (typeof lv === 'number') curLevel = lv;
     curLevel = clamp(curLevel || prog.career.max, 1, prog.career.max);
@@ -67,6 +78,21 @@ export async function startGame(lv) {
   newRun(save.mode, [r.spec], curLevel);
   G.run = r.run;
   resetHud();
+}
+
+// Duo : l'hôte lance la partie de la salle (le serveur la fait tourner), le partenaire attend
+async function startDuoGame(lv) {
+  const r = duo.room;
+  if (!r || r.members.length < 2) return notice('Le duo se joue à deux : crée une salle ou rejoins-en une.', 'warn');
+  if (!r.host) return notice('C’est l’hôte de la salle qui lance la partie.', 'warn');
+  if (save.mode === 'career') {
+    if (typeof lv === 'number') curLevel = lv;
+    curLevel = clamp(curLevel || prog.career.max, 1, prog.career.max);
+  }
+  starting = true;
+  const res = await startDuo(save.mode, save.mode === 'career' ? curLevel : 0);
+  starting = false;
+  if (!res.ok) notice(res.msg || 'Impossible de lancer la partie.');
 }
 
 export function openMenu() {
@@ -101,7 +127,7 @@ export function initGame() {
   $('#btn-mute-menu').addEventListener('click', toggleMute);
   $('#btn-mute-pause').addEventListener('click', toggleMute);
   $('#btn-quit').addEventListener('click', () => act('quit'));
-  $('#btn-again').addEventListener('click', () => startGame());
+  $('#btn-again').addEventListener('click', () => (duo.on ? openMenu() : startGame()));
   $('#btn-nextlv').addEventListener('click', () => startGame(Math.min(CAREER_LEVELS, curLevel + 1)));
   $('#btn-menu').addEventListener('click', () => {
     if (overMode === 'career') {

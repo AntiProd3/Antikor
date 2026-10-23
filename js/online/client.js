@@ -5,7 +5,8 @@
 import { SERVER_URL } from '../config.js';
 import { newProgress } from '../rules.js';
 
-export const PROTOCOL_VERSION = 2;
+// 3 : duo par le serveur (salles avec hôte, duo_start, duo_in, duo_act…) et classement
+export const PROTOCOL_VERSION = 3;
 const TOKEN_KEY = 'antikor-token';
 
 // Progression du compte connecté (copie de celle du serveur, remplacée à chaque message « state »)
@@ -191,6 +192,11 @@ export function request(t, data = {}, { timeout = 10000, retry = false } = {}) {
     if (net.status === 'online') send(r);
     else queue.push(r);
   });
+}
+
+// Message sans réponse attendue (commandes du duo) : perdu si la connexion est coupée
+export function post(t, data = {}) {
+  if (net.status === 'online' && ws && ws.readyState === 1) ws.send(JSON.stringify({ t, ...data }));
 }
 
 function send(r) {

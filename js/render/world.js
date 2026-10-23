@@ -190,10 +190,10 @@ export function drawWorld(cam) {
       ctx.fillRect(e.x - w / 2, e.y - e.r - 12, w * Math.max(0, e.hp / e.maxHp), 4);
     }
   }
-  for (const pl of G.players) for (const w of pl.weapons) if (w.id === 'turret' && w.tur) drawTurrets(w);
+  for (const pl of G.players) if (!pl.gone) for (const w of pl.weapons) if (w.id === 'turret' && w.tur) drawTurrets(w);
   // hero
   if (G.state !== 'dying' && G.state !== 'over') {
-    for (const pl of G.players) if (pl.down) drawDowned(pl);
+    for (const pl of G.players) if (pl.down && !pl.gone) drawDowned(pl);
     for (const pl of G.players) if (!pl.down) drawHero(pl);
   }
   ctx.globalCompositeOperation = 'lighter';

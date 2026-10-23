@@ -8,7 +8,7 @@ Jeu d'arcade néon en HTML/CSS/JavaScript sans dépendance, publié avec GitHub 
 - Code : `index.html` (écrans), `css/` (styles), `js/` (jeu : `data/` réglages, `sim/` simulation, `render/` dessin, `ui/` interface, `online/` connexion au serveur) ; `js/rules.js` contient les règles de progression partagées avec le serveur
 - En local : lancer un petit serveur dans le dossier (`python3 -m http.server`) puis ouvrir http://localhost:8000/ (ouvrir le fichier directement ne marche pas avec les modules)
 
-Version actuelle : **0.9.0** (affichée en bas à droite du jeu).
+Version actuelle : **0.10.0** (affichée en bas à droite du jeu).
 
 ## Armes, raretés et box
 
@@ -37,4 +37,5 @@ Quatre boss au style néon, chacun avec ses attaques : **La Ruche** (renforts), 
 
 - **Compte obligatoire** : pseudo et mot de passe. Noyaux, armes, talents, box et carrière sont gardés sur le serveur du jeu (un Raspberry Pi) et suivent le joueur sur tous ses appareils. Les box sont tirées au sort par le serveur, et les récompenses de fin de partie sont calculées par le serveur après vérification du résultat.
 - **Solo** : la partie tourne sur l'appareil ; le serveur enregistre le début et la fin.
-- **Duo en ligne** : en préparation. La partie tournera sur le serveur, chacun sur son appareil.
+- **Duo en ligne** (v0.10) : l'un crée une salle et donne son code (5 caractères), l'autre le saisit. L'hôte choisit le mode (Carrière ou Infini) et lance. La partie tourne sur le serveur ; chacun joue sur son appareil avec la progression de son compte et reçoit ses propres récompenses. Pas de pause en duo (le menu pause reste accessible). Si un joueur perd la connexion, la partie l'attend 30 secondes ; au-delà, l'autre continue seul.
+- **Classement** (v0.10) : top 15 de tous les joueurs pour 9 statistiques (meilleure manche en Infini, étoiles, niveaux de carrière, éliminations, dégâts, niveau du héros, combo, victoires, parties), avec sa propre place.

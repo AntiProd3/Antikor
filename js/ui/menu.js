@@ -7,24 +7,29 @@ import { WEAPONS } from '../data/weapons.js';
 import { boxArt, svg } from '../icons.js';
 import { equipped, ownedMap } from '../meta.js';
 import { account, logout, prog } from '../online/client.js';
+import { duo, leaveRoom } from '../online/duo.js';
 import { persist, save } from '../save.js';
 import { $, show, updateMuteLabels } from './dom.js';
 import { playPressed } from './game.js';
 import { renderInv } from './inventory.js';
 import { renderLab } from './lab.js';
 import { showLogin } from './login.js';
+import { renderDuo } from './duo.js';
+import { openRank } from './rank.js';
 
 export function renderMenu() {
-  // le duo reviendra par le serveur (phase 3) ; en attendant, seul le solo est jouable
   $('#players-seg').innerHTML = [
-    ['solo', 'Solo', 'Sur cet appareil', true],
-    ['duo', 'Duo en ligne', 'Bientôt, via le serveur', false],
+    ['solo', 'Solo', 'Sur cet appareil', !duo.on],
+    ['duo', 'Duo en ligne', 'À deux, avec un code', duo.on],
   ]
     .map(
-      ([id, n, sub, ok]) =>
-        `<button class="cut ${ok ? 'on' : ''}" data-players="${id}" ${ok ? '' : 'disabled'}><b>${n}</b><span>${sub}</span></button>`,
+      ([id, n, sub, on]) =>
+        `<button class="cut ${on ? 'on' : ''}" data-players="${id}"><b>${n}</b><span>${sub}</span></button>`,
     )
     .join('');
+  renderDuo();
+  // en duo, seul l'hôte lance la partie
+  $('#btn-play').disabled = duo.on && !!duo.room && !duo.room.host;
   const totStars = Object.values(prog.career.stars).reduce((a, b) => a + b, 0);
   $('#mode-seg').innerHTML = [
     ['career', 'Carrière', `Niveau ${prog.career.max} / ${CAREER_LEVELS} · ${totStars}★`],
@@ -69,10 +74,28 @@ export function initMenu() {
     Sfx.click();
     renderMenu();
   });
+  $('#players-seg').addEventListener('click', e => {
+    const b = e.target.closest('[data-players]');
+    if (!b) return;
+    const on = b.dataset.players === 'duo';
+    if (on === duo.on) return;
+    duo.on = on;
+    if (!on && duo.room) leaveRoom();
+    Sfx.init();
+    Sfx.click();
+    renderMenu();
+  });
   $('#btn-play').addEventListener('click', playPressed);
+  $('#btn-rank').addEventListener('click', () => {
+    Sfx.init();
+    Sfx.click();
+    openRank();
+  });
   $('#btn-logout').addEventListener('click', async () => {
     Sfx.init();
     Sfx.click();
+    duo.on = false;
+    duo.room = null;
     await logout();
     showLogin();
   });

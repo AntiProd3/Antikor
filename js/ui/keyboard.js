@@ -7,6 +7,7 @@ import { G } from '../sim/state.js';
 import { chooseLevel } from './cards.js';
 import { $, currentScreen, toggleMute } from './dom.js';
 import { act, curLevel, openMenu, playPressed, startGame } from './game.js';
+import { duo } from '../online/duo.js';
 
 export function initKeyboard() {
   addEventListener('keydown', e => {
@@ -27,7 +28,8 @@ export function initKeyboard() {
       else if (cur === 'scr-map') {
         if (!$('#map-pop').hidden) $('#map-pop').hidden = true;
         else openMenu();
-      } else if (cur === 'scr-lab' || cur === 'scr-inv') {
+      } else if (cur === 'scr-rank') openMenu();
+      else if (cur === 'scr-lab' || cur === 'scr-inv') {
         if (!$('#box-open').hidden) return;
         openMenu();
       }
@@ -53,18 +55,19 @@ export function initKeyboard() {
       return;
     }
     if (cur === 'scr-over' && e.code === 'Enter') {
-      if (!$('#btn-nextlv').hidden) startGame(curLevel + 1);
+      if (duo.on) openMenu();
+      else if (!$('#btn-nextlv').hidden) startGame(curLevel + 1);
       else startGame();
       return;
     }
   });
   addEventListener('keyup', e => keys.delete(e.code));
-  // En duo, perdre le focus ne met pas en pause (le partenaire continue) ; l'hôte qui change d'onglet met la partie en pause car elle s'arrête chez lui
+  // Changer de fenêtre met le solo en pause ; en duo la partie continue (elle tourne sur le serveur)
   addEventListener('blur', () => {
     clearInput(true);
-    if (G && G.state === 'play') pause();
+    if (G && !G.online && G.state === 'play') pause();
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && G && G.state === 'play') pause();
+    if (document.hidden && G && !G.online && G.state === 'play') pause();
   });
 }
