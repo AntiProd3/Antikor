@@ -4,7 +4,7 @@ Jeu d'arcade néon en HTML/CSS/JavaScript sans dépendance, publié avec GitHub 
 
 (Anciennement « Néon Horde », renommé en v0.7 ; les sauvegardes sont reprises automatiquement.)
 
-- Jouer : https://antoinecorcos.github.io/neonhorde/
+- Jouer : https://antiprod3.github.io/antikor/
 - Code : `index.html` (écrans), `css/` (styles), `js/` (jeu : `data/` réglages, `sim/` simulation, `render/` dessin, `ui/` interface, `net/` duo)
 - En local : lancer un petit serveur dans le dossier (`python3 -m http.server`) puis ouvrir http://localhost:8000/ (ouvrir le fichier directement ne marche pas avec les modules)
 

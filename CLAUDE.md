@@ -12,8 +12,9 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
 
 ## Dépôt et publication
 
-- Dépôt GitHub : `antoinecorcos/neonhorde`, branche **`main`**, publiée telle quelle par **GitHub Pages** (Settings → Pages → branche `main`, dossier `/`).
-- URL : https://antoinecorcos.github.io/neonhorde/ (le dépôt sera peut-être renommé plus tard ; l'utilisateur a dit « on verra le dépôt plus tard »).
+- Dépôt GitHub : `AntiProd3/antikor` (compte créé pour le projet ; anciennement `antoinecorcos/neonhorde`, transféré et renommé en octobre 2026), branche **`main`**, publiée telle quelle par **GitHub Pages** (Settings → Pages → branche `main`, dossier `/`).
+- URL : https://antiprod3.github.io/antikor/ (l'ancienne adresse ne redirige pas ; les sauvegardes locales de l'ancienne adresse ne sont pas reprises).
+- Le serveur (duo, comptes, classement) sera dans un **dépôt privé séparé** du même compte. Ne jamais passer ce dépôt public en privé (GitHub Pages s'arrêterait) et ne rien y mettre de secret.
 - Usage établi : **chaque mise à jour validée est commitée et poussée directement sur `main`**, ce qui la met en ligne. On incrémente `VERSION` dans `js/config.js` et la ligne « Version actuelle » du `README.md`.
 - Fichiers :
   - `index.html`, `css/`, `js/` : le jeu (voir « Repères dans le code ») ;
@@ -22,7 +23,7 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
   - `README.md` : présentation et règles ;
   - `manifest.webmanifest` : nom « Antikor », icônes ;
   - les icônes : `apple-touch-icon.png` (180), `icon-192.png`, `icon-512.png`, `favicon-32.png`, `favicon-64.png`. Elles représentent le petit monstre vert (« walker ») du jeu sur fond sombre.
-- L'icône iOS utilise un chemin relatif (`href="apple-touch-icon.png"`), corrigé en v0.8.2 : un chemin absolu `/…` pointerait vers la racine du domaine et non vers `/neonhorde/`. Même règle pour tout nouveau fichier : **toujours des chemins relatifs**.
+- L'icône iOS utilise un chemin relatif (`href="apple-touch-icon.png"`), corrigé en v0.8.2 : un chemin absolu `/…` pointerait vers la racine du domaine et non vers `/antikor/`. Même règle pour tout nouveau fichier : **toujours des chemins relatifs**.
 - Cache : GitHub Pages autorise les navigateurs à garder les fichiers 10 minutes. Juste après une mise en ligne, un joueur peut brièvement avoir un mélange d'anciens et de nouveaux modules ; un rechargement quelques minutes plus tard règle le problème.
 
 ## L'utilisateur et sa façon de travailler
@@ -187,7 +188,6 @@ Chaque fichier commence par une ligne qui dit ce qu'il contient. Les imports en 
 ## Pistes en attente
 
 - **Base de données de joueurs** (comptes, sauvegarde en ligne, classement) : envisagée avec **Supabase** (ou Firebase), le jeu restant sur GitHub Pages. Reportée par l'utilisateur.
-- **Renommer le dépôt** `neonhorde` → `antikor` : cela change l'URL du site. Reporté.
 - **Réactiver et mettre à jour le duo**, quand l'utilisateur le demandera.
 - **Équilibrage :** les chiffres de difficulté de la carrière, des prix et des chances des box sont un premier réglage, à ajuster selon les retours.
 - Idées proposées mais pas encore validées :
