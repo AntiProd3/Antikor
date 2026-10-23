@@ -20,6 +20,7 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
   - `index.html`, `css/`, `js/` : le jeu (voir « Repères dans le code ») ;
   - `tests/sim-bench.mjs` et `package.json` : test de la simulation sous Node (le `package.json` ne sert qu'à Node, pas au site) ;
   - `.prettierrc.json` / `.prettierignore` : réglages de mise en forme du code ;
+  - `test-serveur.html` : page de test du serveur de jeu (comptes, salles), copie de `public/test.html` du dépôt privé AntiBack ; non liée depuis le jeu. Ne pas la modifier ici : recopier depuis AntiBack ;
   - `README.md` : présentation et règles ;
   - `manifest.webmanifest` : nom « Antikor », icônes ;
   - les icônes : `apple-touch-icon.png` (180), `icon-192.png`, `icon-512.png`, `favicon-32.png`, `favicon-64.png`. Elles représentent le petit monstre vert (« walker ») du jeu sur fond sombre.

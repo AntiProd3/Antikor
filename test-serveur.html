@@ -1,0 +1,165 @@
+<!doctype html>
+<!-- Page de test du serveur AntiBack. Original : dépôt AntiBack, public/test.html.
+     Une copie est publiée dans le dépôt du jeu (test-serveur.html) pour tester depuis l'adresse du jeu. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AntiBack · page de test</title>
+<style>
+/* Servie par AntiBack en mode développement (/test) : ouvrir deux onglets. Copie publique : test depuis un téléphone. */
+:root{--bg:#05070e;--panel:#0b1224;--line:#1f2f52;--fg:#e8f4ff;--dim:#8ea3c8;--cyan:#3ef2ff;--mag:#ff3d8b;--green:#62ff9a;--red:#ff4a3d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,'Segoe UI',sans-serif;padding:16px}
+main{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{margin:0;font-size:24px;letter-spacing:.04em}h1 span{color:var(--cyan)}
+section{background:var(--panel);border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:10px}
+h2{margin:0;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input{flex:1 1 140px;min-width:0;background:#070b16;border:1px solid var(--line);color:var(--fg);padding:9px 10px;font:inherit}
+input:focus{outline:none;border-color:var(--cyan)}
+button{background:#12203f;border:1px solid var(--line);color:var(--fg);padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
+button:hover{border-color:var(--cyan)}button.main{background:var(--cyan);color:#021219;border:none}
+button[disabled]{opacity:.4;cursor:not-allowed}
+#status{font-weight:600}#status.ok{color:var(--green)}#status.err{color:var(--red)}
+#code{font-size:28px;font-weight:800;letter-spacing:.2em;color:var(--mag)}
+#chat{min-height:90px;max-height:220px;overflow:auto;background:#070b16;border:1px solid var(--line);padding:8px;font-size:14px}
+#chat b{color:var(--cyan)}
+pre{margin:0;max-height:200px;overflow:auto;background:#070b16;border:1px solid var(--line);padding:8px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;color:#b9c8e6;white-space:pre-wrap;word-break:break-all}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <h1>Anti<span>Back</span> · test du serveur</h1>
+  <p id="status">Pas connecté.</p>
+
+  <section>
+    <h2>Serveur</h2>
+    <div class="row"><input id="server" placeholder="Adresse du serveur, par ex. rpi5.xxxx.ts.net" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+  </section>
+
+  <section id="auth">
+    <h2>Compte</h2>
+    <div class="row"><input id="name" placeholder="Pseudo (3 à 16 caractères)" autocomplete="username"><input id="pass" type="password" placeholder="Mot de passe (8 caractères min.)" autocomplete="current-password"></div>
+    <div class="row"><button class="main" id="register">Créer un compte</button><button id="login">Se connecter</button><button id="resume">Reprendre la session</button></div>
+  </section>
+
+  <section id="lobby" hidden>
+    <h2>Salle</h2>
+    <div class="row"><span>Connecté : <b id="me"></b></span><button id="ping">Ping</button><span id="lat"></span><button id="logout">Se déconnecter</button></div>
+    <div class="row"><button class="main" id="create">Créer une salle</button><input id="joincode" placeholder="CODE" maxlength="5"><button id="join">Rejoindre</button></div>
+    <div id="roombox" hidden>
+      <div class="row"><span id="code"></span><span id="members"></span><button id="leave">Quitter la salle</button></div>
+      <div id="chat"></div>
+      <div class="row"><input id="text" placeholder="Message" maxlength="200"><button id="say">Envoyer</button></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Journal des messages</h2>
+    <pre id="log"></pre>
+  </section>
+</main>
+<script>
+const V = 1;
+const $ = s => document.querySelector(s);
+// Servie par AntiBack (/test) : le serveur est celui de la page, et chaque onglet garde son propre jeton
+// (deux onglets = deux comptes). Copie publique : l'adresse du serveur est à saisir, le jeton reste après fermeture.
+const LOCAL = location.pathname.endsWith('/test');
+const store = LOCAL ? sessionStorage : localStorage;
+const KEY = 'antiback-token';
+$('#server').value = new URLSearchParams(location.search).get('server') || localStorage.getItem('antiback-server') || '';
+if (LOCAL) $('#server').placeholder = 'Vide = ce serveur (' + location.host + ')';
+
+// « rpi5.xxxx.ts.net » ou « https://rpi5.xxxx.ts.net » → wss://rpi5.xxxx.ts.net/ws
+function wsUrl() {
+  let v = $('#server').value.trim();
+  if (!v) return LOCAL ? (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws' : null;
+  localStorage.setItem('antiback-server', v);
+  if (/^wss?:\/\//.test(v)) return v;
+  return 'wss://' + v.replace(/^https?:\/\//, '').replace(/\/.*$/, '') + '/ws';
+}
+let ws = null;
+let pingAt = 0;
+
+function status(text, cls = '') { const s = $('#status'); s.textContent = text; s.className = cls; }
+function log(dir, obj) {
+  const shown = { ...obj };
+  if (shown.pass) shown.pass = '••••';
+  if (shown.token) shown.token = shown.token.slice(0, 6) + '…';
+  const el = $('#log');
+  el.textContent += `${new Date().toLocaleTimeString()} ${dir} ${JSON.stringify(shown)}\n`;
+  el.scrollTop = el.scrollHeight;
+}
+function send(obj) { log('→', obj); ws.send(JSON.stringify(obj)); }
+
+// Une nouvelle connexion à chaque identification : le serveur exige qu'elle arrive dans les 5 secondes
+function connectThen(first) {
+  const url = wsUrl();
+  if (!url) return status('Indique l’adresse du serveur.', 'err');
+  if (ws) ws.close();
+  status('Connexion à ' + url + '…');
+  ws = new WebSocket(url);
+  ws.onopen = () => send(first);
+  ws.onmessage = ev => { const m = JSON.parse(ev.data); log('←', m); onMessage(m); };
+  ws.onclose = ev => {
+    log('×', { fermeture: ev.code, raison: ev.reason });
+    $('#lobby').hidden = true; $('#auth').hidden = false;
+    if (!$('#status').classList.contains('err')) status(`Déconnecté (${ev.code}).`);
+  };
+}
+
+function onMessage(m) {
+  switch (m.t) {
+    case 'auth_ok':
+      if (m.token) store.setItem(KEY, m.token);
+      $('#me').textContent = m.user.name;
+      $('#auth').hidden = true; $('#lobby').hidden = false;
+      status('Connecté en tant que ' + m.user.name + '.', 'ok');
+      break;
+    case 'auth_err':
+      if (m.code === 'bad_token') store.removeItem(KEY);
+      status(m.msg + (m.retryIn ? ` (encore ${Math.ceil(m.retryIn / 60)} min)` : ''), 'err');
+      break;
+    case 'room':
+      $('#roombox').hidden = false;
+      $('#code').textContent = m.code;
+      $('#members').textContent = 'Joueurs : ' + m.members.join(', ');
+      break;
+    case 'room_left':
+      $('#roombox').hidden = true; $('#chat').innerHTML = '';
+      break;
+    case 'said': {
+      const line = document.createElement('div');
+      const who = document.createElement('b'); who.textContent = m.from + ' : ';
+      line.append(who, document.createTextNode(m.text));
+      $('#chat').append(line); $('#chat').scrollTop = 1e9;
+      break;
+    }
+    case 'pong': $('#lat').textContent = Math.round(performance.now() - pingAt) + ' ms'; break;
+    case 'kicked': status(m.msg, 'err'); break;
+    case 'logged_out': store.removeItem(KEY); status('Déconnecté.'); break;
+    case 'err': status(m.msg || m.code, 'err'); break;
+  }
+}
+
+const creds = () => ({ name: $('#name').value.trim(), pass: $('#pass').value });
+$('#register').onclick = () => connectThen({ t: 'register', v: V, ...creds() });
+$('#login').onclick = () => connectThen({ t: 'login', v: V, ...creds() });
+$('#resume').onclick = () => {
+  const token = store.getItem(KEY);
+  if (!token) return status('Aucune session dans cet onglet : connecte-toi.', 'err');
+  connectThen({ t: 'resume', v: V, token });
+};
+$('#create').onclick = () => send({ t: 'room_create' });
+$('#join').onclick = () => send({ t: 'room_join', code: $('#joincode').value.trim() });
+$('#leave').onclick = () => send({ t: 'room_leave' });
+$('#say').onclick = () => { const text = $('#text').value.trim(); if (text) { send({ t: 'say', text }); $('#text').value = ''; } };
+$('#text').onkeydown = e => { if (e.key === 'Enter') $('#say').click(); };
+$('#ping').onclick = () => { pingAt = performance.now(); send({ t: 'ping', id: Date.now() % 1e9 }); };
+$('#logout').onclick = () => send({ t: 'logout' });
+</script>
+</body>
+</html>
