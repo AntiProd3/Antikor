@@ -2,7 +2,7 @@
 
 import { WORLDS, worldOf } from '../data/career.js';
 import { HH, HW, ctx, makeVign } from './canvas.js';
-import { save } from '../save.js';
+import { prog } from '../online/client.js';
 import { G } from '../sim/state.js';
 import { TAU, hexA } from '../util.js';
 
@@ -114,7 +114,7 @@ export function makeFloor(pal = FLOOR) {
 
 // Thème du sol : monde du niveau joué (ou, au menu, monde atteint en carrière)
 export function curTheme() {
-  return (G && G.theme) || WORLDS[worldOf(save.career ? save.career.max : 1)];
+  return (G && G.theme) || WORLDS[worldOf(prog.career ? prog.career.max : 1)];
 }
 
 export function hsh(i, j) {

@@ -255,3 +255,98 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* ---------- Connexion et compte ---------- */
+.login-box {
+  max-width: 520px;
+  container-type: inline-size;
+}
+.login-box .logo {
+  font-size: clamp(40px, 19.5cqi, 110px);
+}
+.login-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.login-panel[hidden] {
+  display: none;
+}
+.field {
+  min-height: 46px;
+  padding: 0 14px;
+  font: 600 16px/1 var(--f-ui); /* 16 px : pas de zoom automatique sur iPhone */
+  background: rgba(12, 20, 40, 0.85);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  -webkit-user-select: text;
+  user-select: text;
+}
+.field:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+.login-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.login-btns .btn {
+  flex: 1 1 160px;
+}
+.login-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.login-status {
+  min-height: 20px;
+  margin: 0;
+  font-size: 14px;
+  color: var(--dim);
+}
+.login-status.err {
+  color: var(--red);
+}
+.menu-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.acc-name {
+  color: var(--cyan);
+  letter-spacing: 0.08em;
+}
+/* Message court en haut de l'écran (erreur du serveur, connexion perdue…) */
+.notice {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  max-width: min(92vw, 520px);
+  padding: 9px 16px;
+  background: rgba(6, 9, 18, 0.95);
+  border: 1px solid var(--red);
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+}
+.notice.warn {
+  border-color: var(--gold);
+}
+.notice.ok {
+  border-color: var(--green);
+}
+.over-wait {
+  font-family: var(--f-ui);
+  font-size: 15px;
+  color: var(--dim);
+}
+.over-wait.err {
+  color: var(--red);
+}

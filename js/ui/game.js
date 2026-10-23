@@ -3,16 +3,15 @@
 import { Sfx } from '../audio.js';
 import { CAREER_LEVELS } from '../data/career.js';
 import { clearInput } from '../input.js';
-import { mySpec } from '../meta.js';
-import { NET, netOpen, netSend } from '../net/net.js';
-import { persist, save } from '../save.js';
+import { prog, request } from '../online/client.js';
+import { save } from '../save.js';
 import { doAct } from '../sim/flow.js';
 import { EV, setRec } from '../sim/fx.js';
 import { hooks } from '../sim/hooks.js';
 import { G, ME, setG, setME, setP } from '../sim/state.js';
 import { newRun } from '../sim/waves.js';
 import { refreshViews, resetLevelView, say, toastFor } from './cards.js';
-import { $, bannerRaw, show, toastRaw, toggleMute } from './dom.js';
+import { $, bannerRaw, notice, show, toastRaw, toggleMute } from './dom.js';
 import { resetHud } from './hud.js';
 import { renderLab } from './lab.js';
 import { openMap } from './map.js';
@@ -20,13 +19,9 @@ import { renderMenu } from './menu.js';
 import { showOver } from './over.js';
 import { clamp } from '../util.js';
 
-// Toute action d'un joueur passe par act() : en local elle s'applique, chez l'invité elle part vers l'hôte.
+// Toute action du joueur passe par act() (en duo, elle partira vers le serveur)
 export function act(a, i) {
   if (!G) return;
-  if (NET.role === 'guest' && G.guest) {
-    netSend({ t: 'act', a, i });
-    return;
-  }
   doAct(G.players[ME], a, i);
 }
 
@@ -43,32 +38,34 @@ export function playPressed() {
   else startGame();
 }
 
-export function startGame(lv) {
+// Une partie commence par un ticket du serveur : il note le début de la partie (pour vérifier le résultat
+// à la fin) et renvoie le joueur à créer (talents, armes possédées, arme équipée) d'après le compte.
+let starting = false;
+
+export async function startGame(lv) {
+  if (starting) return;
   Sfx.init();
   Sfx.resume();
   if (save.mode === 'career') {
     if (typeof lv === 'number') curLevel = lv;
-    curLevel = clamp(curLevel || save.career.max, 1, save.career.max);
+    curLevel = clamp(curLevel || prog.career.max, 1, prog.career.max);
   }
-  const duo = save.players === 'duo';
-  if (duo && NET.role === 'guest') return;
-  if (duo && !(NET.role === 'host' && netOpen() && NET.peerInfo)) {
-    openMenu();
+  starting = true;
+  const r = await request('run_start', { mode: save.mode, level: save.mode === 'career' ? curLevel : 0 });
+  starting = false;
+  if (!r.ok) {
+    notice(r.msg || 'Impossible de lancer la partie.');
     return;
   }
-  const specs = [mySpec()];
-  if (duo) specs.push(NET.peerInfo);
   setME(0);
   resetLevelView();
   show(null);
   $('#hud').hidden = false;
   $('#toasts').innerHTML = '';
   EV.length = 0;
-  setRec(duo);
-  if (duo) netSend({ t: 'start', mode: save.mode });
-  save.runs++;
-  persist();
-  newRun(save.mode, specs, curLevel);
+  setRec(false);
+  newRun(save.mode, [r.spec], curLevel);
+  G.run = r.run;
   resetHud();
 }
 
@@ -77,7 +74,6 @@ export function openMenu() {
   setP(null);
   setRec(false);
   $('#hud').hidden = true;
-  if (NET.role === 'host') netSend({ t: 'menu' });
   renderMenu();
   show('scr-menu');
 }
@@ -95,10 +91,7 @@ export function initGame() {
     refreshViews,
     show,
     clearInput,
-    gameOver: d => {
-      netSend({ t: 'over', d });
-      showOver(d);
-    },
+    gameOver: d => showOver({ ...d, run: G.run }),
   });
   $('#btn-pause').addEventListener('click', () => {
     Sfx.init();

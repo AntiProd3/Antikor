@@ -4,7 +4,7 @@ import { Sfx } from '../audio.js';
 import { CAREER_LEVELS, WORLDS, careerBosses, worldOf } from '../data/career.js';
 import { BOSSV } from '../data/enemies.js';
 import { ICON, svg } from '../icons.js';
-import { save } from '../save.js';
+import { prog } from '../online/client.js';
 import { setG, setP } from '../sim/state.js';
 import { $, currentScreen, show } from './dom.js';
 import { startGame } from './game.js';
@@ -25,7 +25,7 @@ export function openMap(focus) {
   show('scr-map');
   renderMap();
   requestAnimationFrame(() => {
-    const n = document.querySelector(`.lv[data-lv="${focus || save.career.max}"]`);
+    const n = document.querySelector(`.lv[data-lv="${focus || prog.career.max}"]`);
     if (n) n.scrollIntoView({ block: 'center' });
   });
 }
@@ -54,7 +54,7 @@ export function renderMap() {
     }
     return d;
   };
-  const mx = save.career.max;
+  const mx = prog.career.max;
   let h = '';
   WORLDS.forEach((w, wi) => {
     const top = wi === WORLDS.length - 1 ? 0 : pos(wi * 5 + 4).y - GAP / 2,
@@ -68,21 +68,21 @@ export function renderMap() {
     const L = i + 1,
       p = pts[i],
       w = WORLDS[worldOf(L)];
-    const st = save.career.stars[L] || 0;
+    const st = prog.career.stars[L] || 0;
     const locked = L > mx,
       cur = L === mx;
     const big = L % 5 === 0;
     h += `<button class="lv ${locked ? 'locked' : ''} ${cur ? 'cur' : ''} ${big ? 'big' : ''}" data-lv="${L}" style="left:${p.x}px;top:${p.y}px;--c:${w.col}">${big && !locked ? '<span class="crown">BOSS DU MONDE</span>' : ''}${locked ? svg('lock') : L}${locked ? '' : `<span class="st">${starsSvg(st)}</span>`}</button>`;
   }
   inner.innerHTML = h;
-  const tot = Object.values(save.career.stars).reduce((a, b) => a + b, 0);
+  const tot = Object.values(prog.career.stars).reduce((a, b) => a + b, 0);
   $('#map-stars').innerHTML = `<svg viewBox="0 0 24 24">${ICON.star}</svg>${tot} / ${N * 3}`;
 }
 
 export function levelPop(L) {
   const w = WORLDS[worldOf(L)],
     cb = careerBosses(L),
-    st = save.career.stars[L] || 0;
+    st = prog.career.stars[L] || 0;
   const pop = $('#map-pop');
   pop.dataset.lv = L;
   const diff = Math.ceil((L / CAREER_LEVELS) * 10);
@@ -101,7 +101,7 @@ export function initMap() {
     if (!b) return;
     Sfx.init();
     const L = +b.dataset.lv;
-    if (L > save.career.max) {
+    if (L > prog.career.max) {
       Sfx.deny();
       b.classList.remove('shake');
       void b.offsetWidth;

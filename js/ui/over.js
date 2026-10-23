@@ -3,43 +3,21 @@
 import { CAREER_LEVELS, MODES, WORLDS, careerMode, worldOf } from '../data/career.js';
 import { BOXES } from '../data/loot.js';
 import { ICON, svg } from '../icons.js';
-import { NET } from '../net/net.js';
-import { persist, save } from '../save.js';
-import { $, show } from './dom.js';
+import { request } from '../online/client.js';
+import { $, esc, show } from './dom.js';
 import { setOverMode } from './game.js';
 import { fmtTime } from '../util.js';
 
-// Chaque joueur calcule ses noyaux et records avec sa propre sauvegarde
+// Fin de partie : les statistiques s'affichent tout de suite ; les récompenses (noyaux, étoiles, box, déblocage)
+// sont calculées par le serveur, qui vérifie d'abord que le résultat est plausible.
+let overSeq = 0;
+
 export function showOver(d) {
+  const seq = ++overSeq;
   const career = d.mode === 'career';
   const M = career ? careerMode(d.cl) : MODES[d.mode] || MODES.endless;
-  const waves = d.win ? d.wave : d.wave - 1;
-  // Carrière : étoiles selon les PV restants, bonus au premier passage et pour chaque nouvelle étoile, niveau suivant débloqué
-  let stars = 0,
-    bonus = 0,
-    unlocked = false;
-  if (career && d.win && !d.quit) {
-    stars = d.hp >= 0.75 ? 3 : d.hp >= 0.4 ? 2 : 1;
-    const prev = save.career.stars[d.cl] || 0;
-    if (!prev) bonus += 10 + 3 * d.cl;
-    if (stars > prev) {
-      bonus += (stars - prev) * 5;
-      save.career.stars[d.cl] = stars;
-    }
-    if (d.cl >= save.career.max && d.cl < CAREER_LEVELS) {
-      save.career.max = d.cl + 1;
-      unlocked = true;
-    }
-  }
-  let cores = Math.floor(waves * 3 + d.kills / 40 + d.bossKills * 8 + (d.win && !career ? 20 : 0) + bonus);
-  cores = d.quit ? 0 : Math.max(1, cores);
-  save.cores += cores;
-  save.totalKills = (save.totalKills || 0) + d.kills;
-  if (d.win) save.wins++;
-  const b = save.best[d.mode] || 0;
-  const newRec = !career && d.wave > b;
-  if (newRec) save.best[d.mode] = d.wave;
-  persist();
+  const won = career && d.win && !d.quit;
+  const stars = won ? (d.hp >= 0.75 ? 3 : d.hp >= 0.4 ? 2 : 1) : 0;
   $('#over-box').className = 'box over ' + (d.win ? 'win' : 'lose');
   $('#over-title').textContent = d.win
     ? career
@@ -47,15 +25,15 @@ export function showOver(d) {
       : 'VICTOIRE'
     : d.quit
       ? 'ABANDON'
-      : d.duo
-        ? 'VOUS AVEZ CHUTÉ'
-        : 'TU AS CHUTÉ';
+      : 'TU AS CHUTÉ';
   const wd = career ? WORLDS[worldOf(d.cl)] : null;
-  $('#over-sub').textContent = career
-    ? `Monde ${worldOf(d.cl) + 1} · ${wd.name} · niveau ${d.cl}${unlocked ? ' · niveau ' + (d.cl + 1) + ' débloqué !' : ''}`
-    : `${M.name}${d.duo ? ' · duo' : ''} · ${d.win ? 'toutes les vagues tenues' : 'vague ' + d.wave}${newRec ? ' · nouveau record' : ''}`;
+  const sub = extra =>
+    career
+      ? `Monde ${worldOf(d.cl) + 1} · ${wd.name} · niveau ${d.cl}${extra.unlocked ? ' · niveau ' + (d.cl + 1) + ' débloqué !' : ''}`
+      : `${M.name} · ${d.win ? 'toutes les vagues tenues' : 'vague ' + d.wave}${extra.newRec ? ' · nouveau record' : ''}`;
+  $('#over-sub').textContent = sub({});
   const os = $('#over-stars');
-  os.hidden = !(career && d.win && !d.quit);
+  os.hidden = !won;
   os.innerHTML = [1, 2, 3]
     .map(i => `<svg viewBox="0 0 24 24" class="${i <= stars ? 'on' : ''}">${ICON.star}</svg>`)
     .join('');
@@ -68,7 +46,7 @@ export function showOver(d) {
     ['Niveau du héros', d.level],
     ['Pièces ramassées (partie)', d.coins],
   ];
-  if (career && d.win && !d.quit)
+  if (won)
     st.unshift([
       'PV restants',
       Math.round(d.hp * 100) +
@@ -76,30 +54,48 @@ export function showOver(d) {
         (stars === 3 ? 'parfait' : stars === 2 ? '3★ à partir de 75%' : '2★ à partir de 40%'),
     ]);
   $('#over-stats').innerHTML = st.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
-  const bx = d.boxes || {};
-  save.boxes.std += bx.std | 0;
-  save.boxes.prem += bx.prem | 0;
-  persist();
-  $('#over-reward').innerHTML =
-    (d.quit
-      ? `<span style="font-size:15px;color:var(--dim);font-family:var(--f-ui)">Partie abandonnée : aucun noyau.</span>`
-      : svg('core', 2) + `+${cores} noyaux <span class="cur-lbl">gardés pour toujours</span>`) +
-    (bx.std | 0
-      ? ` <span class="rw-box" style="--c:${BOXES.std.col}">${svg('box', 2)}+${bx.std} ${BOXES.std.name}</span>`
-      : '') +
-    (bx.prem | 0
-      ? ` <span class="rw-box" style="--c:${BOXES.prem.col}">${svg('box', 2)}+${bx.prem} ${BOXES.prem.name}</span>`
-      : '');
-  const guest = NET.role === 'guest' && d.duo;
+  const reward = $('#over-reward');
+  reward.innerHTML = `<span class="over-wait">Enregistrement de la partie…</span>`;
   const again = $('#btn-again');
-  again.disabled = guest;
-  again.textContent = guest ? 'L’hôte relance…' : career && !d.win ? 'Réessayer' : 'Rejouer';
+  again.disabled = false;
+  again.textContent = career && !d.win ? 'Réessayer' : 'Rejouer';
   const nx = $('#btn-nextlv');
-  nx.hidden = !(career && d.win && !d.quit && d.cl < CAREER_LEVELS);
+  nx.hidden = !(won && d.cl < CAREER_LEVELS);
   nx.className = 'btn btn-gold cut';
   again.className = nx.hidden ? 'btn btn-gold cut' : 'btn cut';
   $('#btn-menu').textContent = career ? 'Carte' : 'Menu';
   setOverMode(career ? 'career' : 'endless');
   $('#hud').hidden = true;
   show('scr-over');
+
+  const res = {
+    win: !!d.win,
+    quit: !!d.quit,
+    wave: d.wave,
+    kills: d.kills,
+    bossKills: d.bossKills,
+    time: Math.round(d.time * 10) / 10,
+    hp: Math.round(d.hp * 1000) / 1000,
+    level: d.level,
+    boxes: { std: d.boxes.std | 0, prem: d.boxes.prem | 0 },
+  };
+  // renvoyée après une coupure : le serveur ne compte une partie qu'une fois
+  request('run_end', { run: d.run, res }, { retry: true, timeout: 120000 }).then(r => {
+    if (seq !== overSeq) return;
+    if (!r.ok) {
+      reward.innerHTML = `<span class="over-wait err">Récompenses non enregistrées : ${esc(r.msg || r.code)}</span>`;
+      return;
+    }
+    $('#over-sub').textContent = sub(r);
+    reward.innerHTML =
+      (d.quit
+        ? `<span class="over-wait">Partie abandonnée : aucun noyau.</span>`
+        : svg('core', 2) + `+${r.cores} noyaux <span class="cur-lbl">gardés sur ton compte</span>`) +
+      (r.boxes.std
+        ? ` <span class="rw-box" style="--c:${BOXES.std.col}">${svg('box', 2)}+${r.boxes.std} ${BOXES.std.name}</span>`
+        : '') +
+      (r.boxes.prem
+        ? ` <span class="rw-box" style="--c:${BOXES.prem.col}">${svg('box', 2)}+${r.boxes.prem} ${BOXES.prem.name}</span>`
+        : '');
+  });
 }

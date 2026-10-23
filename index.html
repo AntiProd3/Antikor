@@ -21,7 +21,6 @@
 <link rel="stylesheet" href="css/collection.css">
 <link rel="stylesheet" href="css/map.css">
 <link rel="stylesheet" href="css/tooltips.css">
-<link rel="stylesheet" href="css/duo.css">
 <link rel="stylesheet" href="css/screens.css">
 <link rel="stylesheet" href="css/hud.css">
 </head>
@@ -55,6 +54,22 @@
 
 <div id="banner"><div class="bm" id="b-main"></div><div class="bs" id="b-sub"></div></div>
 
+<!-- CONNEXION -->
+<div class="screen" id="scr-login" hidden>
+  <div class="box login-box">
+    <h1 class="logo"><span class="l1">ANTI</span><span class="l2">KOR</span></h1>
+    <p class="tagline">Tiens jusqu’à la dernière vague. Ouvre des box, collectionne les armes rares et fais évoluer ton arsenal.</p>
+    <form class="panel cut login-panel" id="login-form">
+      <div class="eyebrow">Ton compte</div>
+      <input class="field cut" id="login-name" name="username" autocomplete="username" placeholder="Pseudo" maxlength="16" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Pseudo">
+      <input class="field cut" id="login-pass" name="password" type="password" autocomplete="current-password" placeholder="Mot de passe" aria-label="Mot de passe">
+      <div class="login-btns"><button class="btn btn-gold cut" type="submit" id="btn-login">Se connecter</button><button class="btn cut" type="button" id="btn-register">Créer un compte</button></div>
+      <p class="help">Ton compte garde ta progression (noyaux, armes, talents, carrière) et te suit sur tous tes appareils.</p>
+    </form>
+    <div class="login-row"><p class="login-status" id="login-status"></p><button class="btn cut" id="btn-retry" hidden>Réessayer</button></div>
+  </div>
+</div>
+
 <!-- MENU -->
 <div class="screen" id="scr-menu">
   <div class="box menu">
@@ -62,7 +77,6 @@
       <h1 class="logo"><span class="l1">ANTI</span><span class="l2">KOR</span></h1>
       <p class="tagline">Tiens jusqu’à la dernière vague. Ouvre des box, collectionne les armes rares et fais évoluer ton arsenal.</p>
       <div class="group"><div class="eyebrow">Joueurs</div><div class="seg two" id="players-seg"></div></div>
-      <div class="panel cut duo" id="duo-panel" hidden></div>
       <div class="group"><div class="eyebrow">Mode</div><div class="seg two" id="mode-seg"></div></div>
       <div class="group"><div class="eyebrow">Arme équipée</div><div class="equip"><div id="equip-card"></div><button class="btn cut inv-btn" id="btn-inv"></button></div></div>
       <div class="play-row"><button class="btn btn-primary cut" id="btn-play">JOUER</button><kbd>Entrée</kbd></div>
@@ -70,13 +84,13 @@
     <div class="side">
       <button class="lab-cta cut" id="btn-lab"></button>
       <div class="panel cut">
-        <div class="eyebrow" style="margin-bottom:10px">Records</div>
+        <div class="eyebrow" style="margin-bottom:10px">Records · <b class="acc-name" id="acc-name"></b></div>
         <dl class="kv" id="menu-records"></dl>
       </div>
       <div class="panel cut">
         <div class="eyebrow" style="margin-bottom:8px">Commandes</div>
         <p class="help"><b>ZQSD, WASD ou flèches</b> pour bouger. Les armes tirent toutes seules.<br><b>Doigt ou souris</b> : glisse n’importe où pour faire apparaître le joystick.<br><b>Échap</b> pause · <b>M</b> son · <b>1–4</b> choisir une carte</p>
-        <button class="btn cut" id="btn-mute-menu" style="margin-top:12px">Son : activé</button>
+        <div class="menu-btns"><button class="btn cut" id="btn-mute-menu">Son : activé</button><button class="btn cut" id="btn-logout">Se déconnecter</button></div>
       </div>
     </div>
   </div>
@@ -112,6 +126,7 @@
 
 <!-- BOX -->
 <div id="tip" hidden></div>
+<div id="notice" class="notice cut" role="status" hidden></div>
 <div id="box-open" hidden><div class="bo-stage" id="bo-stage"></div></div>
 <div class="ver" id="ver"></div>
 

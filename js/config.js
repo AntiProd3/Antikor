@@ -1,6 +1,6 @@
-// Version affichée et interrupteurs généraux.
+// Version affichée et adresse du serveur de jeu.
 
-export const VERSION = '0.8.3';
+export const VERSION = '0.9.0';
 
-// Mode duo suspendu : le code réseau reste en place mais n'est plus maintenu ni accessible
-export const DUO_ENABLED = false;
+// Serveur AntiBack (Raspberry Pi, exposé par Tailscale Funnel) : comptes, progression, et bientôt le duo
+export const SERVER_URL = 'wss://rpi5.tail085c70.ts.net/ws';

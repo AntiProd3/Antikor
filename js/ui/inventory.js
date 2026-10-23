@@ -6,16 +6,16 @@ import { PASSIVES } from '../data/passives.js';
 import { WEAPONS } from '../data/weapons.js';
 import { svg } from '../icons.js';
 import { equipped, ownedMap } from '../meta.js';
-import { persist, save } from '../save.js';
+import { prog, request } from '../online/client.js';
 import { showReveal } from './boxes.js';
-import { $ } from './dom.js';
+import { $, notice } from './dom.js';
 import { retip } from './tooltips.js';
 
 /* ---------- Inventaire & box ---------- */
 
 export function stacks() {
   const m = new Map();
-  for (const it of save.inv) {
+  for (const it of prog.inv) {
     const k = it.id + '|' + it.r;
     if (!m.has(k)) m.set(k, { id: it.id, r: it.r, items: [] });
     m.get(k).items.push(it);
@@ -56,31 +56,22 @@ export function renderInv() {
 
 export function equipStack(key) {
   const [id, r] = key.split('|');
-  const it = save.inv.find(x => x.id === id && x.r === +r);
+  const it = prog.inv.find(x => x.id === id && x.r === +r);
   if (!it) return;
-  save.equip = it.u;
-  persist();
   Sfx.click();
-  renderInv();
+  request('equip', { u: it.u }).then(res => res.ok || notice(res.msg));
 }
 
-export function fuse(key) {
-  const [id, r0] = key.split('|');
-  const r = +r0;
-  const its = save.inv.filter(x => x.id === id && x.r === r);
-  if (its.length < 3 || r >= 4) {
+// Fusion faite par le serveur : 3 exemplaires identiques → 1 de la rareté au-dessus
+export async function fuse(key) {
+  const [id, r] = key.split('|');
+  const res = await request('fuse', { id, r: +r });
+  if (!res.ok) {
     Sfx.deny();
+    notice(res.msg);
     return;
   }
-  const used = its.slice(0, 3);
-  const wasEq = used.some(x => x.u === save.equip);
-  save.inv = save.inv.filter(x => !used.includes(x));
-  const nu = { u: save.uid++, id, r: r + 1 };
-  save.inv.push(nu);
-  if (wasEq) save.equip = nu.u;
-  persist();
-  renderInv();
-  showReveal(nu, false, 'FUSION !');
+  showReveal(res.item, false, 'FUSION !');
 }
 
 export function initInventory() {

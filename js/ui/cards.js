@@ -5,7 +5,6 @@ import { RARITY } from '../data/loot.js';
 import { PASSIVES, PCOL } from '../data/passives.js';
 import { WEAPONS } from '../data/weapons.js';
 import { svg } from '../icons.js';
-import { netSend } from '../net/net.js';
 import { optInfo, priceOf, rerollCost, validOpt } from '../sim/options.js';
 import { plName } from '../sim/player.js';
 import { G, ME, P, withP } from '../sim/state.js';
@@ -31,12 +30,11 @@ export function say(pl, n, arg) {
   if (pl.i === ME) {
     if (Sfx[n]) Sfx[n]();
     if (n === 'deny') shakeCard(arg);
-  } else netSend({ t: 'say', n, arg });
+  }
 }
 
 export function toastFor(pl, a, b, c) {
   if (pl.i === ME) toastRaw(a, b, c);
-  else netSend({ t: 'toast', a: [a, b, c] });
 }
 
 export function shakeCard(idx) {
@@ -48,7 +46,7 @@ export function shakeCard(idx) {
   }
 }
 
-// Ré-affiche l'écran de niveau ou de boutique de chaque joueur (le sien en local, celui de l'invité par le réseau)
+// Ré-affiche l'écran de niveau ou de boutique du joueur local
 export function refreshViews(only) {
   for (const pl of G.players) {
     if (only && pl !== only) continue;
@@ -56,7 +54,6 @@ export function refreshViews(only) {
     if (!k) return;
     const v = k === 'level' ? levelView(pl) : shopView(pl);
     if (pl.i === ME) (k === 'level' ? applyLevelView : applyShopView)(v);
-    else netSend({ t: 'view', k, v });
   }
 }
 

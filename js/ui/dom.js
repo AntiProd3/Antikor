@@ -30,6 +30,22 @@ export function bannerRaw(main, sub, col) {
   b.classList.add('show');
 }
 
+// Message court en haut de l'écran, visible aussi hors partie (erreurs du serveur, connexion…)
+let noticeTO = 0;
+export function notice(text, kind = 'err', ms = 3500) {
+  if (!text) return;
+  const n = $('#notice');
+  n.textContent = text;
+  n.className = 'notice cut ' + kind;
+  n.hidden = false;
+  clearTimeout(noticeTO);
+  if (ms) noticeTO = setTimeout(() => (n.hidden = true), ms);
+}
+
+export function hideNotice() {
+  $('#notice').hidden = true;
+}
+
 export function toastRaw(title, text, col) {
   const t = document.createElement('div');
   t.className = 'toast cut';

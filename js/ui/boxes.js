@@ -4,68 +4,60 @@ import { Sfx } from '../audio.js';
 import { BOXES, RARITY, rarBonus } from '../data/loot.js';
 import { WEAPONS } from '../data/weapons.js';
 import { boxArt, svg } from '../icons.js';
-import { ownedMap } from '../meta.js';
-import { persist, save } from '../save.js';
-import { $, currentScreen } from './dom.js';
+import { prog, request } from '../online/client.js';
+import { $, currentScreen, notice } from './dom.js';
 import { renderInv } from './inventory.js';
 import { renderLab } from './lab.js';
+import { renderMap } from './map.js';
 import { renderMenu } from './menu.js';
-import { pick } from '../util.js';
 
 export function renderBox() {
   $('#box-list').innerHTML = Object.entries(BOXES)
     .map(([k, B]) => {
-      const n = save.boxes[k];
+      const n = prog.boxes[k];
       const tot = B.odds.reduce((a, b) => a + b, 0);
       return `<div class="card cut box-card" style="--c:${B.col}"><div class="card-top"><span class="tag">${n ? n + ' EN STOCK' : 'BOX'}</span></div><div class="box-art">${boxArt()}</div><div class="card-name">${B.name}</div>
    <dl class="odds">${B.odds.map((o, r) => (o ? `<dt style="--rc:${RARITY[r].col}">${RARITY[r].name}</dt><dd>${((o / tot) * 100).toFixed(o / tot < 0.01 ? 1 : 0)}%</dd>` : '')).join('')}</dl>
-   <div class="inv-actions">${n ? `<button class="btn btn-gold cut" data-open="${k}">Ouvrir (${n})</button>` : ''}<button class="btn cut" data-buy="${k}" ${save.cores < B.cost ? 'disabled' : ''}>Acheter · <span class="nk">${svg('core', 2)}${B.cost}</span></button></div></div>`;
+   <div class="inv-actions">${n ? `<button class="btn btn-gold cut" data-open="${k}">Ouvrir (${n})</button>` : ''}<button class="btn cut" data-buy="${k}" ${prog.cores < B.cost ? 'disabled' : ''}>Acheter · <span class="nk">${svg('core', 2)}${B.cost}</span></button></div></div>`;
     })
     .join('');
-}
-
-export function rollBox(k) {
-  const B = BOXES[k];
-  let x = Math.random() * B.odds.reduce((a, b) => a + b, 0),
-    r = 0;
-  for (; r < 4; r++) {
-    x -= B.odds[r];
-    if (x < 0) break;
-  }
-  return { id: pick(Object.keys(WEAPONS)), r };
 }
 
 // Ouverture : la box tremble et change de couleur jusqu'à sa vraie rareté, puis l'arme apparaît
 export let boTO = [];
 
-export function openBox(k, buy) {
-  if (buy) {
-    if (save.cores < BOXES[k].cost) {
-      Sfx.deny();
-      return;
-    }
-    save.cores -= BOXES[k].cost;
-  } else {
-    if (save.boxes[k] <= 0) return;
-    save.boxes[k]--;
+let opening = false;
+
+export async function openBox(k, buy) {
+  if (opening) return;
+  if (buy ? prog.cores < BOXES[k].cost : !(prog.boxes[k] > 0)) {
+    Sfx.deny();
+    return;
   }
-  const res = rollBox(k);
-  const isNew = ownedMap()[res.id] === undefined;
-  const it = { u: save.uid++, id: res.id, r: res.r };
-  save.inv.push(it);
-  persist();
+  // le serveur tire l'arme ; la box tremble pendant ce temps
+  opening = true;
   for (const t of boTO) clearTimeout(t);
   boTO = [];
   const ov = $('#box-open');
   ov.hidden = false;
   ov.dataset.k = k;
+  ov.onclick = null;
   $('#bo-stage').innerHTML =
     `<div class="bo-box shake" id="bo-box" style="--gc:${BOXES[k].col}">${boxArt()}</div><div class="bo-hint">Ouverture…</div>`;
   Sfx.init();
   Sfx.unbox();
+  const r = await request('box_open', { kind: k, buy });
+  opening = false;
+  if (!r.ok) {
+    ov.hidden = true;
+    notice(r.msg);
+    return;
+  }
+  const it = r.item,
+    isNew = r.isNew;
   const box = $('#bo-box');
   const steps = [];
-  for (let r = 0; r <= res.r; r++) steps.push(r);
+  for (let r = 0; r <= it.r; r++) steps.push(r);
   const dt = Math.max(260, 1100 / steps.length);
   steps.forEach((r, i) =>
     boTO.push(
@@ -103,12 +95,12 @@ export function showReveal(it, isNew, title) {
   const d = WEAPONS[it.id],
     R = RARITY[it.r];
   const k = ov.dataset.k || 'std';
-  const same = save.inv.filter(x => x.id === it.id && x.r === it.r).length;
+  const same = prog.inv.filter(x => x.id === it.id && x.r === it.r).length;
   const again = title
     ? ''
-    : save.boxes[k] > 0
-      ? `<button class="btn btn-gold cut" data-again="open">Ouvrir une autre (${save.boxes[k]})</button>`
-      : save.cores >= BOXES[k].cost
+    : prog.boxes[k] > 0
+      ? `<button class="btn btn-gold cut" data-again="open">Ouvrir une autre (${prog.boxes[k]})</button>`
+      : prog.cores >= BOXES[k].cost
         ? `<button class="btn btn-gold cut" data-again="buy">Racheter · ${svg('core', 2)}${BOXES[k].cost} noyaux</button>`
         : '';
   $('#bo-stage').innerHTML =
@@ -124,10 +116,7 @@ export function showReveal(it, isNew, title) {
     if (a === 'open') openBox(k, false);
     else if (a === 'buy') openBox(k, true);
     else {
-      if (a === 'equip') {
-        save.equip = it.u;
-        persist();
-      }
+      if (a === 'equip') request('equip', { u: it.u });
       ov.hidden = true;
       refreshMeta();
     }
@@ -139,6 +128,7 @@ export function refreshMeta() {
   if (c === 'scr-lab') renderLab();
   else if (c === 'scr-inv') renderInv();
   else if (c === 'scr-menu') renderMenu();
+  else if (c === 'scr-map') renderMap();
 }
 
 export function initBoxes() {

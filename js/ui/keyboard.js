@@ -62,9 +62,9 @@ export function initKeyboard() {
   // En duo, perdre le focus ne met pas en pause (le partenaire continue) ; l'hôte qui change d'onglet met la partie en pause car elle s'arrête chez lui
   addEventListener('blur', () => {
     clearInput(true);
-    if (G && G.state === 'play' && !G.guest && G.players.length < 2) pause();
+    if (G && G.state === 'play') pause();
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && G && G.state === 'play' && !G.guest) pause();
+    if (document.hidden && G && G.state === 'play') pause();
   });
 }
