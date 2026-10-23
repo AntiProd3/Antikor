@@ -1,9 +1,9 @@
 // Déroulement de la partie : actions des joueurs, choix de niveau, boutique, pause, fin.
 
 import { shockwave } from './combat.js';
-import { sfx } from './fx.js';
+import { sfx, textFx } from './fx.js';
 import { hooks } from './hooks.js';
-import { applyOpt, optLabel, priceOf, rerollCost, rollOptions, rollShop, validOpt } from './options.js';
+import { applyOpt, candidates, optLabel, priceOf, rerollCost, rollOptions, rollShop, validOpt } from './options.js';
 import { G, P, withP } from './state.js';
 import { startWave } from './waves.js';
 import { clamp } from '../util.js';
@@ -43,14 +43,40 @@ export function doAct(pl, a, i) {
 
 export function openLevel() {
   G.state = 'level';
-  hooks.clearInput();
   for (const pl of G.players) {
     pl.pend += G.pendingLevels;
+    autoLevels(pl);
     if (pl.pend > 0) rollLevel(pl);
   }
   G.pendingLevels = 0;
+  // Personne n'a de carte à choisir : pas d'écran, la partie continue
+  if (!G.players.some(p => p.pend > 0)) {
+    if (G.afterLevel === 'shop') openShop();
+    else G.state = 'play';
+    return;
+  }
+  hooks.clearInput();
   sfx('level');
   hooks.refreshViews();
+}
+
+// PV regagnés à une montée de niveau quand tout est déjà au maximum
+export function maxedHeal() {
+  return 2 * G.level;
+}
+
+// Tout est au maximum (armes, équipements, évolutions) : pas de choix, le joueur regagne des PV
+function autoLevels(pl) {
+  let healed = 0;
+  while (pl.pend > 0 && !withP(pl, () => candidates('level').length)) {
+    pl.hp = Math.min(pl.maxHp, pl.hp + maxedHeal());
+    healed += maxedHeal();
+    pl.pend--;
+  }
+  if (!healed) return;
+  textFx(pl.x, pl.y - 24, '+' + healed, '#62ff9a');
+  hooks.say(pl, 'heal');
+  hooks.toastFor(pl, 'NIVEAU ' + G.level, `Tout est au maximum : +${healed} PV`, '#62ff9a');
 }
 
 export function rollLevel(pl) {
@@ -71,6 +97,7 @@ export function pickFor(pl, i) {
   });
   pl.pend--;
   hooks.say(pl, 'buy');
+  autoLevels(pl);
   if (pl.pend > 0) rollLevel(pl);
   else if (o.kind !== 'evo') hooks.toastFor(pl, 'PRIS', name, '#62ff9a');
   if (G.players.some(p => p.pend > 0)) {
@@ -104,6 +131,7 @@ export function openShop() {
     const heal = Math.round(pl.maxHp * 0.3);
     pl.hp = Math.min(pl.maxHp, pl.hp + heal);
     pl.shop.rerolls = 0;
+    pl.shop.bought = [];
     pl.shop.free = pl.freeRerolls;
     pl.ready = false;
     withP(pl, rollShop);
@@ -128,6 +156,7 @@ export function buyFor(pl, idx) {
   }
   s.sold = true;
   s.locked = false;
+  pl.shop.bought.push(s.o.id);
   hooks.say(pl, 'buy');
   hooks.refreshViews(pl);
 }

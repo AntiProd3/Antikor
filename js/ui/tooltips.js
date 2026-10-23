@@ -1,6 +1,6 @@
 // Infobulles : détails des armes, talents, box et monnaies.
 
-import { BOXES, RARITY, rarBonus } from '../data/loot.js';
+import { RARITY, rarBonus } from '../data/loot.js';
 import { PASSIVES } from '../data/passives.js';
 import { TALENTS, TFX, TNOTE } from '../data/talents.js';
 import { WEAPONS } from '../data/weapons.js';
@@ -62,16 +62,6 @@ export function tipData(key) {
     return {
       col: t.col,
       html: `<div class="th">${t.name}</div><p class="ts">Niveau ${l} / ${t.max}</p><dl><dt>Actuellement</dt><dd>${TFX[t.id](l)}</dd>${max ? '' : `<dt>Niveau suivant</dt><dd>${TFX[t.id](l + 1)}</dd><dt>Coût</dt><dd class="tc">${talentCost(t, l)} noyaux</dd>`}${talentGate(t, l) ? `<dt>Déblocage</dt><dd>atteindre le monde ${talentGate(t, l)} en carrière</dd>` : ''}</dl><p class="tn">${TNOTE[t.id]}</p>`,
-    };
-  }
-  if (k === 'b' && BOXES[a]) {
-    const B = BOXES[a];
-    const tot = B.odds.reduce((x, y) => x + y, 0);
-    return {
-      col: B.col,
-      html: `<div class="th">${B.name}</div><div>Contient <b>1 arme au hasard</b> parmi les ${Object.keys(WEAPONS).length} du jeu.</div>
-  <dl>${B.odds.map((o, r) => (o ? `<dt style="color:${RARITY[r].col}">${RARITY[r].name}</dt><dd>${((o / tot) * 100).toFixed(o / tot < 0.01 ? 1 : 0)}% · ${rarBonus(r)}</dd>` : '')).join('')}</dl>
-  <p class="tn">Doublons : 3 armes identiques de même rareté fusionnent en une rareté supérieure (inventaire). Les boss lâchent aussi des box${a === 'prem' ? ' (la Box Mutante vient du boss final)' : ''}.</p>`,
     };
   }
   if (k === 'c' && a === 'core')

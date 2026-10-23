@@ -17,7 +17,7 @@ export function renderBox() {
     .map(([k, B]) => {
       const n = save.boxes[k];
       const tot = B.odds.reduce((a, b) => a + b, 0);
-      return `<div class="card cut box-card" style="--c:${B.col}" data-tip="b:${k}"><div class="card-top"><span class="tag">${n ? n + ' EN STOCK' : 'BOX'}</span><span class="tipi" data-tipi>?</span></div><div class="box-art">${boxArt()}</div><div class="card-name">${B.name}</div>
+      return `<div class="card cut box-card" style="--c:${B.col}"><div class="card-top"><span class="tag">${n ? n + ' EN STOCK' : 'BOX'}</span></div><div class="box-art">${boxArt()}</div><div class="card-name">${B.name}</div>
    <dl class="odds">${B.odds.map((o, r) => (o ? `<dt style="--rc:${RARITY[r].col}">${RARITY[r].name}</dt><dd>${((o / tot) * 100).toFixed(o / tot < 0.01 ? 1 : 0)}%</dd>` : '')).join('')}</dl>
    <div class="inv-actions">${n ? `<button class="btn btn-gold cut" data-open="${k}">Ouvrir (${n})</button>` : ''}<button class="btn cut" data-buy="${k}" ${save.cores < B.cost ? 'disabled' : ''}>Acheter · <span class="nk">${svg('core', 2)}${B.cost}</span></button></div></div>`;
     })

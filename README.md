@@ -8,7 +8,7 @@ Jeu d'arcade néon en HTML/CSS/JavaScript sans dépendance, publié avec GitHub 
 - Code : `index.html` (écrans), `css/` (styles), `js/` (jeu : `data/` réglages, `sim/` simulation, `render/` dessin, `ui/` interface, `net/` duo)
 - En local : lancer un petit serveur dans le dossier (`python3 -m http.server`) puis ouvrir http://localhost:8000/ (ouvrir le fichier directement ne marche pas avec les modules)
 
-Version actuelle : **0.8.2** (affichée en bas à droite du jeu).
+Version actuelle : **0.8.3** (affichée en bas à droite du jeu).
 
 ## Armes, raretés et box
 

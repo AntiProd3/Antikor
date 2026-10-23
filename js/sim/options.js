@@ -53,12 +53,8 @@ export function rollOptions(n, ctx) {
       n - out.length,
     ),
   );
-  const fill = [
-    { kind: 'gold', id: 'gold' },
-    { kind: 'heal', id: 'heal' },
-  ];
-  let i = 0;
-  while (out.length < n) out.push(fill[i++ % 2]);
+  // Plus rien à améliorer : un coffre soigne (la montée de niveau, elle, est gérée dans flow.js)
+  if (!out.length && ctx === 'chest') out.push({ kind: 'heal', id: 'heal' });
   return out;
 }
 
@@ -83,10 +79,6 @@ export function validOpt(o) {
   }
 }
 
-export function goldBonus() {
-  return 20 + 6 * G.wave;
-}
-
 export function applyOpt(o) {
   switch (o.kind) {
     case 'wnew':
@@ -106,9 +98,6 @@ export function applyOpt(o) {
       break;
     case 'pup':
       P.passives[o.id]++;
-      break;
-    case 'gold':
-      P.coins += goldBonus();
       break;
     case 'heal':
       P.hp = Math.min(P.maxHp, P.hp + P.maxHp * 0.5);
@@ -171,14 +160,6 @@ export function optInfo(o) {
       hint,
     };
   }
-  if (o.kind === 'gold')
-    return {
-      name: 'Bourse',
-      tag: 'BONUS',
-      col: '#ffd23e',
-      icon: 'gold',
-      desc: `+${goldBonus()} pièces immédiatement.`,
-    };
   return { name: 'Kit de soin', tag: 'SOIN', col: '#62ff9a', icon: 'heal', desc: 'Rend 50% des PV max.' };
 }
 
@@ -213,7 +194,7 @@ export function rollShop() {
   const keep = sh.offers.filter(s => s.locked && !s.sold && validOpt(s.o));
   const ids = new Set(keep.map(s => s.o.id));
   const picks = weightedPicks(
-    candidates('shop').filter(o => !ids.has(o.id)),
+    candidates('shop').filter(o => !ids.has(o.id) && !sh.bought.includes(o.id)),
     4 - keep.length,
   );
   sh.offers = [...keep, ...picks.map(o => ({ o, locked: false, sold: false }))];

@@ -8,7 +8,7 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
 - Le jeu s'appelait **« Néon Horde »** jusqu'à la v0.7. Il a été renommé parce qu'un jeu Steam porte ce nom.
 - **Le jeu est découpé en modules ES** depuis la v0.8.2 : `index.html` (le squelette HTML des écrans), `css/` et `js/`. Aucune dépendance, aucune étape de construction : GitHub Pages sert les fichiers tels quels. Avant, tout tenait dans un seul `index.html` de 2 200 lignes.
 - **Langue :** l'interface, les commentaires du code et les échanges avec l'utilisateur sont en **français**. Les messages de commit sont en anglais.
-- **Version actuelle : 0.8.2.** Elle est affichée en bas à droite du jeu (`VERSION` dans `js/config.js`).
+- **Version actuelle : 0.8.3.** Elle est affichée en bas à droite du jeu (`VERSION` dans `js/config.js`).
 
 ## Dépôt et publication
 
@@ -36,7 +36,7 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
 - Il aime le style **néon sobre**, le côté **addictif** (box, raretés, étoiles, carte de niveaux) et la **vibe biologique**.
 - Réponses attendues en français, claires, sans jargon. On résume ce qui a changé et ce qui a été testé.
 
-## Fonctionnalités actuelles (v0.8.2)
+## Fonctionnalités actuelles (v0.8.3)
 
 ### Menu
 - Logo **ANTIKOR** sur une ligne : « ANTI » en cyan, « KOR » en rose néon qui clignote. Sa taille suit la colonne (unités `cqi`).
@@ -74,7 +74,8 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
 
 ### Partie
 - Déplacement : ZQSD, WASD ou flèches. Sur tactile, un joystick apparaît là où le doigt se pose ; **son centre reste fixe** (v0.8.1).
-- Les armes tirent seules. Les gemmes donnent de l'XP ; à chaque niveau on choisit une carte parmi 3 (4 avec le talent).
+- Les armes tirent seules. Les gemmes donnent de l'XP (`xpFor()`, +15 % en v0.8.3) ; à chaque niveau on choisit une carte parmi 3 (4 avec le talent). Plus de cartes « Bourse » ou « Kit de soin » de remplissage : s'il reste moins de cartes possibles, on en propose moins ; quand tout est au maximum, **pas d'écran de choix**, le joueur regagne `2 × niveau` PV (`maxedHeal()`). Un coffre sans amélioration possible soigne.
+- Boutique : une **relance** ne repropose pas ce qu'on vient d'acheter dans la même boutique (`shop.bought`).
 - Une boutique s'ouvre entre les vagues et se paie en **pièces**.
 - Il y a des élites (avec coffre), des événements (encerclement, nuée, mur) et des bonus au sol (cœur, aimant, bombe).
 - **Emplacements d'armes :** une partie commence avec **1 seule arme** (celle équipée). Le talent **Arsenal** monte jusqu'à 4 armes.
@@ -111,10 +112,10 @@ Document de passation pour reprendre le travail dans une nouvelle conversation. 
   - les **noyaux** sont **violets** (`--core:#c77dff`) : monnaie permanente gagnée en fin de partie, dépensée au labo ;
   - les **pièces** sont **dorées** : monnaie de la partie, dépensée dans la boutique entre les vagues, perdue à la fin.
 - **Infobulles** (`data-tip`, `tipData()`, `#tip`) :
-  - au survol sur PC, via un bouton « ? » sur tactile (et toujours visible sur les box) ;
+  - au survol sur PC, via un bouton « ? » sur tactile ;
   - armes : statistiques du niveau 1 au niveau 5 avec la rareté, progression et évolution ;
   - talents : effet actuel et suivant, coût, explication ;
-  - box et monnaies.
+  - monnaies (les box n'ont plus d'infobulle depuis la v0.8.3).
 
 ### Duo en ligne : suspendu
 - Il est désactivé par `const DUO_ENABLED=false` : bouton grisé « Bientôt de retour », lien `?join=` ignoré.
@@ -184,6 +185,7 @@ Chaque fichier commence par une ligne qui dit ce qu'il contient. Les imports en 
 - **0.7 :** renommage en **Antikor**, bouton Labo attractif, nouvelles box en capsule. **0.7.1 :** Labo en haut à droite, JOUER plus gros. **0.7.2 :** noyaux violets et pièces dorées, infobulles, fond de boss. **0.7.3 :** fond de boss = grille d'origine éclaircie. **0.7.4 :** logo sur une ligne.
 - **0.8 :** mode Carrière (25 niveaux, carte, étoiles), 5 fonds de monde, Tourelle et Servomoteur.
 - **0.8.1 :** carte en pleine largeur sur PC, « ? » sur les box, Arsenal lié aux mondes, joystick fixe.
+- **0.8.3 :** fin de partie sans cartes « Bourse »/« Soin » (soin automatique quand tout est au maximum), plus d'infobulle sur les box, la relance de la boutique ne repropose pas l'achat qui vient d'être fait, +15 % d'XP par niveau.
 - **0.8.2 :** réorganisation du code sans changement de jeu : découpage en modules (`css/`, `js/data`, `js/sim`, `js/render`, `js/ui`, `js/net`), simulation séparée de la page (phase 0 du bilan serveur), test Node `tests/sim-bench.mjs`, chemin de l'icône iOS corrigé.
 
 ## Pistes en attente

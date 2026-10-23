@@ -80,9 +80,6 @@
     display: grid;
   }
 }
-.box-card .tipi {
-  display: grid;
-}
 .tipi:hover {
   color: var(--fg);
   border-color: var(--fg);

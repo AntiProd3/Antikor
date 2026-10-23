@@ -6,8 +6,9 @@ import { pick } from '../util.js';
 
 export const PCOLS = ['#3ef2ff', '#ff6ad5'];
 
+// XP nécessaire pour passer le niveau l (+15 % depuis la v0.8.3 : un peu moins de montées de niveau)
 export function xpFor(l) {
-  return Math.round(5 + l * 5 + l * l * 0.35);
+  return Math.round((5 + l * 5 + l * l * 0.35) * 1.15);
 }
 
 // spec = {ts: talents, owned: {arme: meilleure rareté possédée}, start: {id, r} arme équipée}
@@ -37,7 +38,7 @@ export function mkPlayer(i, spec) {
     revive: ts.revive,
     choices: 3 + ts.choice,
     freeRerolls: ts.freeRerolls,
-    shop: { offers: [], rerolls: 0, free: 0 },
+    shop: { offers: [], rerolls: 0, free: 0, bought: [] },
     pend: 0,
     rid: 0,
     curOpts: null,
